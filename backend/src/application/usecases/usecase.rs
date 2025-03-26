@@ -1,4 +1,4 @@
-use rocket::async_trait;
+use async_trait::async_trait;
 use crate::domain::entities::Entity;
 use crate::domain::errors::Error;
 
