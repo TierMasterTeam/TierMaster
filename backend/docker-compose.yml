@@ -1,0 +1,13 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:3000"
+    restart: always
+    env_file:
+      - .env
+    environment:
+      SERVER_IP: "0.0.0.0"
+      SERVER_PORT: 3000
