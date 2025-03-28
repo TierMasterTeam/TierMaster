@@ -30,14 +30,8 @@ Follow the installation instructions and restart your terminal.
 
 ### Setting Up the Project
 
-1. Clone the repository (if you haven't already):
 
-```bash
-git clone https://github.com/yourusername/TierMaster.git
-cd TierMaster/backend
-```
-
-2. Set up environment variables:
+Set up environment variables:
 
 ```bash
 cp .env.example .env
@@ -86,40 +80,8 @@ Or with docker-compose:
 docker-compose up
 ```
 
-## Project Structure
-
-```
-backend/
-├── src/                # Source code
-│   ├── main.rs         # Entry point
-│   ├── routes/         # API routes
-│   ├── models/         # Data models
-│   └── services/       # Business logic
-├── Cargo.toml          # Project dependencies
-├── Cargo.lock          # Dependency lock file
-├── .env.example        # Example environment variables
-└── README.md           # This file
-```
-
-## API Endpoints
-
-- `GET /` - Health check and API version
-- `GET /api/v1/tiers` - Get available tiers
-- `POST /api/v1/tiers` - Create a new tier
-
 ## Running Tests
 
 ```bash
 cargo test
 ```
-
-## Contributing
-
-Please follow the standard Rust code formatting rules:
-
-```bash
-cargo fmt
-cargo clippy
-```
-
-Make sure all tests pass before submitting a pull request.
