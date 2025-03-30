@@ -125,6 +125,7 @@ dependencies = [
  "derive-new",
  "dotenv",
  "mongodb",
+ "serde",
  "tokio",
 ]
 

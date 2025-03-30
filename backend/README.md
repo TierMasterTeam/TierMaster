@@ -85,3 +85,9 @@ docker-compose up
 ```bash
 cargo test
 ```
+
+## API Client: using bruno
+Check [Bruno Website](https://www.usebruno.com/)
+
+To use it, open the **./api-client** folder in bruno
+and select the **tier-master** environment.
