@@ -1,4 +1,20 @@
 @import "tailwindcss";
-/* #app {
 
-} */
+@theme {
+  --color-red-custom: #DB504A;
+  --color-gray-custom: #2F2D2E;
+  --color-light-green-custom: #31E7C3;
+  --color-dark-green-custom: #1D7874;
+  --color-black-custom: #0C0C0C;
+  --color-white-custom: #F7F7F8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
+}
+#app {
+  @apply bg-gray-custom
+  min-h-screen
+}
