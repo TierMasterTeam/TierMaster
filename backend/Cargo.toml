@@ -9,3 +9,5 @@ axum = "0.8.1"
 dotenv = "0.15.0"
 tokio = { version = "1.44.1", features = ["rt-multi-thread"] }
 async-trait = "0.1.88"
+mongodb = "3.2.3"
+derive-new = "0.7.0"
