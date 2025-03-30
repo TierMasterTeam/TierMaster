@@ -9,7 +9,7 @@ const props = defineProps<{
   index: number;
   isDragging: boolean;
   isDraggedItem: boolean;
-  isDropTarget: boolean;
+  isPreview?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -67,13 +67,17 @@ const toggleNameBubble = () => {
 <template>
   <div
     class="w-19 h-19 rounded-md flex items-center justify-center bg-cover bg-center bg-no-repeat
- text-white font-bold relative transition-transform item-card"
+ text-white font-bold relative transition-all item-card"
     :class="{
-      'dragging': isDraggedItem,
-      'drag-over-before': isDropTarget,
-      'item-hover': !isDragging
+      'dragging': isDraggedItem && !isPreview,
+      'item-hover': !isDragging,
+      'preview-item': isPreview
     }"
-    :style="`background-image: url(${item.img}); transform: ${isDraggedItem ? 'scale(0.9)' : 'scale(1)'};`"
+    :style="`
+      background-image: url(${item.img});
+      transform: ${isDraggedItem && !isPreview ? 'scale(0.9)' : 'scale(1)'};
+      opacity: ${isPreview ? '0.6' : '1'};
+    `"
     draggable="true"
     @dragstart="onDragStart"
     @dragover.prevent="onDragOver"
@@ -97,7 +101,7 @@ const toggleNameBubble = () => {
 .item-card {
   cursor: grab;
   user-select: none;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.2s ease;
   position: relative;
 }
 
@@ -107,7 +111,7 @@ const toggleNameBubble = () => {
 }
 
 .item-card.dragging {
-  opacity: 0.6;
+  opacity: 0;  /* Hide the original item during drag */
 }
 
 .item-card.item-hover:hover {
@@ -116,25 +120,17 @@ const toggleNameBubble = () => {
   z-index: 10;
 }
 
-.item-card.drag-over-before::before {
-  content: '';
-  position: absolute;
-  left: -6px;
-  top: 0;
-  height: 100%;
-  width: 4px;
-  background-color: #F7F7F8;
-  border-radius: 4px;
-  animation: pulse 1.5s infinite;
+.item-card.preview-item {
+  border: 2px dashed #31E7C3;
+  box-shadow: 0 0 8px rgba(49, 231, 195, 0.4);
+  animation: pulse-border 1.5s infinite;
 }
 
-@keyframes pulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
+@keyframes pulse-border {
+  0% { border-color: rgba(49, 231, 195, 0.4); }
+  50% { border-color: rgba(49, 231, 195, 0.8); }
+  100% { border-color: rgba(49, 231, 195, 0.4); }
 }
-
-
 
 /* Name bubble styles */
 .name-bubble {

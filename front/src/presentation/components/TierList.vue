@@ -13,10 +13,21 @@ const draggedFromTier = ref<Tier | null>(null);
 const dragOverIndex = ref<number>(-1);
 const dragOverTier = ref<Tier | null>(null);
 const isDragging = ref(false);
+const dragSourceIndex = ref(-1);
 
+// Create a temporary state for preview positioning during drag
+const previewState = ref({
+  items: [] as Item[],
+  tier: null as Tier | null,
+  active: false
+});
+
+
+// Function to handle drag start
 const onDragStart = (item: Item, tier: Tier, event: DragEvent) => {
   draggedItem.value = item;
   draggedFromTier.value = tier;
+  dragSourceIndex.value = tier.items.findIndex((i: Item) => i.name === item.name);
   isDragging.value = true;
 
   // Set a custom drag image if supported
@@ -36,12 +47,59 @@ const onDragStart = (item: Item, tier: Tier, event: DragEvent) => {
 
 const onDragOver = (event: DragEvent, index: number, tier: Tier) => {
   event.preventDefault();
+
+  // Only proceed if we have a valid dragged item
+  if (!draggedItem.value || !draggedFromTier.value) return;
+
+  // Handle special case for end of list
+  const itemCount = tier.items.length;
+  // If mouse position is in the last third of the last card, place after it
+  if (index === itemCount - 1) {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const mouseX = event.clientX;
+    const mouseY = event.clientY;
+
+    // Check if mouse is in right third of the card (assuming horizontal layout)
+    if (mouseX > rect.left + (rect.width * 0.7)) {
+      index = itemCount;
+    }
+  }
+
   dragOverIndex.value = index;
   dragOverTier.value = tier;
+
+  // Create a preview of the tier's items with the dragged item in the new position
+  if (tier && draggedItem.value) {
+    // Clone the current tier's items
+    const itemsCopy = [...tier.items];
+
+    // If the dragged item is from the same tier, remove it from its current position
+    if (tier === draggedFromTier.value) {
+      const currentIndex = itemsCopy.findIndex(i => i.name === draggedItem.value!.name);
+      if (currentIndex !== -1) {
+        itemsCopy.splice(currentIndex, 1);
+      }
+    }
+
+    // Insert the dragged item at the new position
+    if (index >= 0 && index <= itemsCopy.length) {
+      itemsCopy.splice(index, 0, draggedItem.value);
+    } else {
+      itemsCopy.push(draggedItem.value);
+    }
+
+    // Update the preview state
+    previewState.value = {
+      items: itemsCopy,
+      tier: tier,
+      active: true
+    };
+  }
 };
 
 const onDragLeave = () => {
-  dragOverIndex.value = -1;
+  // We don't reset dragOverIndex here to maintain the preview
+  // This is handled when the drag ends or we drop
 };
 
 const onDrop = (targetTier: Tier, targetIndex: number = -1) => {
@@ -63,21 +121,40 @@ const onDrop = (targetTier: Tier, targetIndex: number = -1) => {
       targetTier.items.push(draggedItem.value);
     }
 
-    draggedItem.value = null;
-    draggedFromTier.value = null;
-    dragOverIndex.value = -1;
-    dragOverTier.value = null;
-    isDragging.value = false;
+    // Reset all tracking states
+    resetDragState();
   }
 };
 
 const onDragEnd = () => {
-  // Reset drag states
+  resetDragState();
+};
+
+const resetDragState = () => {
   draggedItem.value = null;
   draggedFromTier.value = null;
   dragOverIndex.value = -1;
   dragOverTier.value = null;
   isDragging.value = false;
+  dragSourceIndex.value = -1;
+  previewState.value = {
+    items: [],
+    tier: null,
+    active: false
+  };
+};
+
+// Get the displayed items for a tier, taking into account the preview if active
+const getDisplayedItems = (tier: Tier) => {
+  if (previewState.value.active && previewState.value.tier === tier) {
+    return previewState.value.items;
+  }
+  return tier.items;
+};
+
+// Check if an item is the one being dragged
+const isItemBeingDragged = (item: Item): boolean => {
+  return Boolean(draggedItem.value && draggedItem.value.name === item.name);
 };
 
 onMounted(() => {
@@ -87,6 +164,30 @@ onMounted(() => {
 onUnmounted(() => {
   tierListStore.disconnectWebSocket();
 });
+const onDragOverEmptyZone = (tier: Tier) => {
+  if (!draggedItem.value || !draggedFromTier.value) return;
+
+  dragOverTier.value = tier;
+  dragOverIndex.value = tier.items.length; // fin de liste
+
+  // Construire la preview à la fin
+  const itemsCopy = [...tier.items];
+  if (tier === draggedFromTier.value) {
+    const currentIndex = itemsCopy.findIndex(i => i.name === draggedItem.value!.name);
+    if (currentIndex !== -1) {
+      itemsCopy.splice(currentIndex, 1);
+    }
+  }
+
+  itemsCopy.push(draggedItem.value);
+
+  previewState.value = {
+    items: itemsCopy,
+    tier: tier,
+    active: true
+  };
+};
+
 </script>
 
 <template>
@@ -95,40 +196,30 @@ onUnmounted(() => {
       {{ tierListStore.tierList.name + ' :' }}
     </h1>
     <div class="grid gap-4">
-      <div
-        v-for="tier in tierListStore.tierList.tiers"
-        :key="tier.name"
-        :class="[
-          'p-3 rounded-3xl shadow-md tier-container flex gap-2 border-2',
-          { 'tier-dropzone': isDragging, 'tier-active-dropzone': isDragging && dragOverTier === tier && dragOverIndex === -1 }
-        ]"
-        @dragover.prevent
-        @drop.prevent="onDrop(tier)"
-        @dragenter.prevent="dragOverTier = tier">
-        <div :style="{backgroundColor: tier.color}" class="text-center text-zinc-900 text-2xl mb-2 w-19 h-19 rounded-full flex items-center justify-center">{{ tier.name }}</div>
-        <div
-          :class="[
-            'flex flex-wrap gap-2 rounded-md',
-          ]"
-          :style="{ transition: 'background-color 0.2s ease' }">
-
-          <ItemCard
-            v-for="(item, index) in tier.items"
-            :key="`${item.name}-${index}`"
-            :item="item"
-            :tier="tier"
-            :index="index"
-            :isDragging="isDragging"
-            :isDraggedItem="draggedItem?.name === item.name"
-            :isDropTarget="dragOverIndex === index && dragOverTier === tier"
-            @dragstart="onDragStart"
-            @dragover="onDragOver"
-            @dragleave="onDragLeave"
-            @drop="onDrop"
-            @dragend="onDragEnd"
-          />
-
+      <div v-for="tier in tierListStore.tierList.tiers" :key="tier.name" :class="[
+        'p-3 rounded-3xl shadow-md tier-container flex gap-2 border-2',
+        { 'tier-dropzone': isDragging, 'tier-active-dropzone': isDragging && dragOverTier === tier && dragOverIndex === -1 }
+      ]" @drop.prevent="onDrop(tier)" @dragenter.prevent="dragOverTier = tier">
+        <div :style="{ backgroundColor: tier.color }"
+          class="text-center text-zinc-900 text-2xl mb-2 w-[76px] h-[76px] min-w-[76px] flex-shrink-0 rounded-full flex items-center justify-center">
+          {{ tier.name }}
         </div>
+
+        <div :class="[
+          'flex flex-wrap gap-2 rounded-md w-full',
+        ]" :style="{ transition: 'background-color 0.2s ease' }">
+
+          <ItemCard v-for="(item, index) in getDisplayedItems(tier)" :key="`${item.name}-${index}`" :item="item"
+            :tier="tier" :index="index" :isDragging="isDragging" :isDraggedItem="isItemBeingDragged(item)"
+            :isPreview="previewState.active && previewState.tier === tier && isItemBeingDragged(item)"
+            @dragstart="onDragStart" @dragover="onDragOver" @dragleave="onDragLeave" @drop="onDrop"
+            @dragend="onDragEnd" />
+
+          <!-- Drop zone de fin placée après toutes les cartes, suit le wrap -->
+          <div class="flex-grow h-auto flex" @dragover.prevent="onDragOverEmptyZone(tier)" @drop.prevent="onDrop(tier)">
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -149,9 +240,16 @@ onUnmounted(() => {
 }
 
 @keyframes glow {
-  0% { box-shadow: 0 0 0 2px rgba(49, 231, 195, 0.3); }
-  50% { box-shadow: 0 0 0 4px rgba(29, 120, 116, 0.5); }
-  100% { box-shadow: 0 0 0 2px rgba(49, 231, 195, 0.3); }
+  0% {
+    box-shadow: 0 0 0 2px rgba(49, 231, 195, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 0 4px rgba(29, 120, 116, 0.5);
+  }
+
+  100% {
+    box-shadow: 0 0 0 2px rgba(49, 231, 195, 0.3);
+  }
 }
 </style>
-
