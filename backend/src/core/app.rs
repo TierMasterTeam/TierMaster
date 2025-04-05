@@ -1,8 +1,8 @@
-use dotenv::dotenv;
-use mongodb::Database;
 use crate::core::app_state::{AppState, APP_STATE};
 use crate::core::db::DatabaseConnection;
 use crate::core::server::Server;
+use dotenv::dotenv;
+use mongodb::Database;
 
 pub struct App;
 
