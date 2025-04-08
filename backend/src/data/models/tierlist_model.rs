@@ -1,7 +1,9 @@
-use crate::data::models::model::Model;
 use crate::domain::entities::tierlist_entity::TierlistEntity;
 use mongodb::bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
+use mongodb::bson::oid::Error;
+use crate::domain::entities::create_tierlist_entity::CreateTierlistEntity;
+use crate::domain::mapper::TryEntityMapper;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TierlistModel {
@@ -10,7 +12,7 @@ pub struct TierlistModel {
     pub author: ObjectId,
 }
 
-impl Model<TierlistEntity> for TierlistModel {
+impl TryEntityMapper<TierlistEntity> for TierlistModel {
     fn to_entity(self) -> TierlistEntity {
         TierlistEntity {
             id: self._id.to_string(),
@@ -18,12 +20,30 @@ impl Model<TierlistEntity> for TierlistModel {
             author: self.author.to_string(),
         }
     }
+}
 
-    fn from_entity(entity: TierlistEntity) -> Self {
-        TierlistModel {
-            _id: ObjectId::parse_str(entity.id).unwrap(),
-            name: entity.name,
-            author: ObjectId::parse_str(entity.author).unwrap(),
-        }
+impl TryFrom<TierlistEntity> for TierlistModel {
+    type Error = Error;
+
+    fn try_from(value: TierlistEntity) -> Result<Self, Self::Error> {
+        let id = ObjectId::parse_str(value.id)?;
+
+        let name = value.name;
+        let author = ObjectId::parse_str(value.author)?;
+
+        Ok(Self { _id: id, name, author })
+    }
+}
+
+impl TryFrom<CreateTierlistEntity> for TierlistModel {
+    type Error = Error;
+
+    fn try_from(value: CreateTierlistEntity) -> Result<Self, Self::Error> {
+        let id = ObjectId::new();
+
+        let name = value.name;
+        let author = ObjectId::parse_str(value.author)?;
+
+        Ok(Self { _id: id, name, author })
     }
 }

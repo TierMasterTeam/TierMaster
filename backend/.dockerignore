@@ -4,3 +4,4 @@ Dockerfile
 .idea/
 secrets/
 *.env*
+api-client/

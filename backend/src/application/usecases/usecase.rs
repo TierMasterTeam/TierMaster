@@ -1,8 +1,7 @@
 use async_trait::async_trait;
-use crate::domain::entities::Entity;
-use crate::domain::errors::Error;
+use crate::domain::error::ApiError;
 
 #[async_trait]
-pub trait UseCase<E: Entity, T: Error>: Send + Sync {
-    async fn execute(&self) -> Result<E, T>;
+pub trait UseCase<E>: Send + Sync {
+    async fn execute(&self) -> Result<E, ApiError>;
 }

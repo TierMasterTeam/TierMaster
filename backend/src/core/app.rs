@@ -1,4 +1,4 @@
-use crate::core::app_state::{AppState, APP_STATE};
+use crate::core::app_state::{AppState};
 use crate::core::db::DatabaseConnection;
 use crate::core::server::Server;
 use dotenv::dotenv;
@@ -18,10 +18,9 @@ impl App {
             .unwrap();
 
         //4- AppState initialisation
-        let state = AppState::new(database);
-        APP_STATE.set(state).unwrap();
+        let state = AppState::init(database);
 
         //3- Server initialisation
-        Server::init().await;
+        Server::init(state).await;
     }
 }
