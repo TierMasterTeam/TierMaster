@@ -11,3 +11,6 @@ tokio = { version = "1.44.1", features = ["rt-multi-thread"] }
 async-trait = "0.1.88"
 mongodb = "3.2.3"
 derive-new = "0.7.0"
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
+futures = "0.3.31"

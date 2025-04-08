@@ -1,9 +1,9 @@
+use crate::core::db::DatabaseConnection;
+use async_trait::async_trait;
+use mongodb::options::{ClientOptions, Credential, ServerApi, ServerApiVersion};
+use mongodb::{Client, Database};
 use std::env;
 use std::error::Error;
-use async_trait::async_trait;
-use mongodb::{Client, Database};
-use mongodb::options::{AuthMechanism, ClientOptions, Credential, ServerApi, ServerApiVersion};
-use crate::core::db::DatabaseConnection;
 
 #[async_trait]
 impl DatabaseConnection for Database {
@@ -22,7 +22,6 @@ impl DatabaseConnection for Database {
         let credentials = Credential::builder()
             .username(user)
             .password(password)
-            .mechanism(AuthMechanism::ScramSha256)
             .build();
 
         let server_api = ServerApi::builder()
