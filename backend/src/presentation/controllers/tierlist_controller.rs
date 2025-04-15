@@ -1,45 +1,50 @@
-use crate::domain::services::tierlist_service;
-use crate::presentation::controllers::controller::{Controller, Route};
-use crate::presentation::utils::api_error_utils::api_error_to_response;
-use axum::response::Response;
-use axum::{
-    extract::Path,
-    http::StatusCode,
-    response::IntoResponse,
-    routing::get,
-    routing::MethodRouter,
-    Json
-};
+use std::sync::Arc;
+use axum::extract::{Path, State};
+use axum::{Json, Router};
+use axum::http::StatusCode;
+use axum::routing::{get, post};
+use crate::core::app_state::{AppState};
+use crate::domain::mapper::EntityMapper;
+use crate::presentation::error::ApiErrorResponse;
+use crate::presentation::presenters::create_tierlist_presenter::CreateTierlistPresenter;
+use crate::presentation::presenters::tierlist_presenter::TierlistPresenter;
 
-pub struct TierListController;
+pub struct TierlistController;
 
-impl<S> Controller<S> for TierListController
-where S: Clone + Send + Sync + 'static {
-    fn get_routes(&self) -> Vec<Box<dyn Route<S>>> {
-        let get_tierlists_of_user_route = Box::new(GerTierlistsOfUserRoute);
+impl TierlistController {
+    pub fn get_router() -> Router<Arc<AppState>> {
+        let router = Router::new()
+            .route("/", post(create_tierlist))
+            .route("/user/{id}", get(get_tierlists_of_user));
 
-        vec![
-            get_tierlists_of_user_route
-        ]
+        Router::new()
+            .nest("/tierlist", router)
     }
 }
 
-struct GerTierlistsOfUserRoute;
+async fn create_tierlist (
+    State(state): State<Arc<AppState>>,
+    Json(tierlist): Json<CreateTierlistPresenter>,
+) -> Result<StatusCode, ApiErrorResponse> {
+    let tierlist = tierlist.to_entity();
 
-impl<S> Route<S> for GerTierlistsOfUserRoute
-where S: Clone + Send + Sync + 'static {
-    fn path(&self) -> &str {
-        "/tierlist/user/{id}"
-    }
+    state.service_factory()
+        .tierlist_service()
+        .create_tierlist(tierlist)
+        .await?;
 
-    fn method(&self) -> MethodRouter<S> {
-        get(get_tierlists_of_user)
-    }
+    Ok(StatusCode::CREATED)
 }
 
-async fn get_tierlists_of_user(Path(id): Path<String>) -> Response {
-    match tierlist_service::get_tierlists_of_user(&id).await {
-        Ok(tierlists) => (StatusCode::OK, Json(tierlists)).into_response(),
-        Err(err) => api_error_to_response(err),
-    }
+async fn get_tierlists_of_user(
+    Path(id): Path<String>,
+    State(state): State<Arc<AppState>>,
+) -> Result<Json<Vec<TierlistPresenter>>, ApiErrorResponse> {
+
+    let result = state.service_factory()
+        .tierlist_service()
+        .get_tierlists_of_user(id.as_str())
+        .await?;
+
+    Ok(Json(result.into_iter().map(TierlistPresenter::from).collect()))
 }

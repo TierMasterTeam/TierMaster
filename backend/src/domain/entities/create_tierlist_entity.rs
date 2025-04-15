@@ -1,6 +1,5 @@
 #[derive(Debug, Clone)]
-pub struct TierlistEntity {
-    pub id: String,
+pub struct CreateTierlistEntity{
     pub name: String,
     pub author: String,
 }
