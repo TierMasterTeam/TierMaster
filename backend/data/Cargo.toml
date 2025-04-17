@@ -1,0 +1,16 @@
+[package]
+name = "data"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+domain = { path = "../domain" }
+application = { path = "../application" }
+
+serde = {workspace = true}
+# tokio = {workspace = true}
+async-trait = {workspace = true}
+# derive-new = {workspace = true}
+futures = {workspace = true}
+
+mongodb = "3.2.3"

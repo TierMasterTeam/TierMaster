@@ -1,0 +1,21 @@
+[package]
+name = "core"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "tiermaster-backend"
+path = "src/main.rs"
+
+[dependencies]
+data = {path = "../data"}
+presentation = {path = "../presentation"}
+
+# Uncomment if needed
+# serde = {workspace = true}
+tokio = {workspace = true}
+# async-trait = {workspace = true}
+# derive-new = {workspace = true}
+# futures = {workspace = true}
+
+dotenv = "0.15.0"

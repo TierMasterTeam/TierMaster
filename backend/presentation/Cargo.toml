@@ -1,0 +1,17 @@
+[package]
+name = "presentation"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+domain = { path = "../domain" }
+application = { path = "../application" }
+
+# Uncomment if needed
+serde = {workspace = true}
+tokio = {workspace = true}
+# async-trait = {workspace = true}
+# derive-new = {workspace = true}
+# futures = {workspace = true}
+
+axum = "0.8.3"

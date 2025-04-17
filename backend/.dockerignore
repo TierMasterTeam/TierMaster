@@ -1,6 +1,8 @@
 target/
 Cargo.lock
-Dockerfile
+Dockerfile*
+.dockerignore
+.gitignore
 .idea/
 secrets/
 *.env*
