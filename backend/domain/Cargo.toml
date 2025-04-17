@@ -1,0 +1,12 @@
+[package]
+name = "domain"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+# Uncomment if needed
+# serde = {workspace = true}
+# tokio = {workspace = true}
+async-trait = {workspace = true}
+# derive-new = {workspace = true}
+# futures = {workspace = true}

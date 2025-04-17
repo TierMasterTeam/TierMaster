@@ -63,7 +63,7 @@ cargo run
 cargo run --release
 ```
 
-The API will be available at the configured address (default: http://127.0.0.1:8080).
+The API will be available at the configured address (default: http://127.0.0.1:3000).
 
 ## Docker Support
 
