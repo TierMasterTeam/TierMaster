@@ -1,8 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Jersey+25&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
 @import "tailwindcss";
+
 
 @theme {
   --color-red-custom: #DB504A;
   --color-gray-custom: #2F2D2E;
+  --color-dark-gray-custom: #1A1C1E;
+  --color-light-gray-custom: #88898B;
   --color-light-green-custom: #31E7C3;
   --color-dark-green-custom: #1D7874;
   --color-black-custom: #0C0C0C;
@@ -12,9 +16,14 @@
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
+    font-family: "Roboto Mono", monospace;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-size: 16px;
+    font-style: normal;
   }
 }
 #app {
-  @apply bg-gray-custom
+  @apply bg-dark-gray-custom
   min-h-screen
 }
