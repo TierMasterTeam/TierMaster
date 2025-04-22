@@ -47,17 +47,13 @@ const onDragEnd = () => {
 };
 
 const toggleNameBubble = () => {
-  // Only show bubble if not currently dragging
   if (props.isDragging) return;
 
   showNameBubble.value = true;
-
-  // Clear any existing timeout
   if (timeoutId.value !== null) {
     window.clearTimeout(timeoutId.value);
   }
 
-  // Auto-hide the bubble after 2 seconds
   timeoutId.value = window.setTimeout(() => {
     showNameBubble.value = false;
   }, 2000);
