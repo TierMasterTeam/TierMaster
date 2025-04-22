@@ -13,11 +13,13 @@ const showNameBubble = ref(false);
 const timeoutId = ref<number | null>(null);
 
 const toggleNameBubble = () => {
-  if (props.isDragging) return; // Désactive pendant le drag
+  if (props.isDragging) return;
+
   showNameBubble.value = true;
   if (timeoutId.value !== null) {
     window.clearTimeout(timeoutId.value);
   }
+
   timeoutId.value = window.setTimeout(() => {
     showNameBubble.value = false;
   }, 2000);

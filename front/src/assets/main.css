@@ -11,6 +11,8 @@
   --color-dark-green-custom: #1D7874;
   --color-black-custom: #0C0C0C;
   --color-white-custom: #F7F7F8;
+  --font-roboto: "Roboto Mono", monospace;
+  --font-jersey: "Jersey 25", sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
