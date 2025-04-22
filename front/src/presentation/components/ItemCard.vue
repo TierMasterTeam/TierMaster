@@ -1,88 +1,41 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { type Tier } from '@/domain/interfaces/TierList';
 import { type Item } from '@interfaces/Item';
 
 const props = defineProps<{
   item: Item;
   tier: Tier;
-  index: number;
-  isDragging: boolean;
-  isDraggedItem: boolean;
-  isDropTarget: boolean;
+  isDragging?: boolean;
 }>();
 
-const emit = defineEmits<{
-  'dragstart': [item: Item, tier: Tier, event: DragEvent];
-  'dragover': [event: DragEvent, index: number, tier: Tier];
-  'dragleave': [];
-  'drop': [tier: Tier, index: number];
-  'dragend': [];
-}>();
-
-// State for the name bubble
 const showNameBubble = ref(false);
 const timeoutId = ref<number | null>(null);
 
-const onDragStart = (event: DragEvent) => {
-  emit('dragstart', props.item, props.tier, event);
-};
-
-const onDragOver = (event: DragEvent) => {
-  emit('dragover', event, props.index, props.tier);
-};
-
-const onDrop = (event: DragEvent) => {
-  event.preventDefault();
-  event.stopPropagation();
-  emit('drop', props.tier, props.index);
-};
-
-const onDragLeave = () => {
-  emit('dragleave');
-};
-
-const onDragEnd = () => {
-  emit('dragend');
-};
-
 const toggleNameBubble = () => {
-  // Only show bubble if not currently dragging
-  if (props.isDragging) return;
-
+  if (props.isDragging) return; // Désactive pendant le drag
   showNameBubble.value = true;
-
-  // Clear any existing timeout
   if (timeoutId.value !== null) {
     window.clearTimeout(timeoutId.value);
   }
-
-  // Auto-hide the bubble after 2 seconds
   timeoutId.value = window.setTimeout(() => {
     showNameBubble.value = false;
   }, 2000);
 };
+
+// Masque la bulle si drag commence
+watch(() => props.isDragging, (val) => {
+  if (val) showNameBubble.value = false;
+});
 </script>
 
 <template>
   <div
     class="w-19 h-19 rounded-md flex items-center justify-center bg-cover bg-center bg-no-repeat
  text-white font-bold relative transition-transform item-card"
-    :class="{
-      'dragging': isDraggedItem,
-      'drag-over-before': isDropTarget,
-      'item-hover': !isDragging
-    }"
-    :style="`background-image: url(${item.img}); transform: ${isDraggedItem ? 'scale(0.9)' : 'scale(1)'};`"
-    draggable="true"
-    @dragstart="onDragStart"
-    @dragover.prevent="onDragOver"
-    @dragleave="onDragLeave"
-    @drop.prevent="onDrop"
-    @dragend="onDragEnd"
+    :style="`background-image: url(${item.img});`"
     @click="toggleNameBubble"
   >
-    <!-- Name bubble -->
     <div
       v-if="showNameBubble"
       class="name-bubble"
@@ -106,37 +59,12 @@ const toggleNameBubble = () => {
   transform: scale(1.05);
 }
 
-.item-card.dragging {
-  opacity: 0.6;
-}
-
-.item-card.item-hover:hover {
-  transform: scale(1.05);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  z-index: 10;
-}
-
-.item-card.drag-over-before::before {
-  content: '';
-  position: absolute;
-  left: -6px;
-  top: 0;
-  height: 100%;
-  width: 4px;
-  background-color: #F7F7F8;
-  border-radius: 4px;
-  animation: pulse 1.5s infinite;
-}
-
 @keyframes pulse {
   0% { opacity: 0.6; }
   50% { opacity: 1; }
   100% { opacity: 0.6; }
 }
 
-
-
-/* Name bubble styles */
 .name-bubble {
   position: absolute;
   top: -40px;
