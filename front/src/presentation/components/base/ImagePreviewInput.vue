@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { CircleMinus, Image } from 'lucide-vue-next'
-import { ref, defineExpose } from 'vue'
+import { ref } from 'vue'
 import BaseInput from './BaseInput.vue'
 
 const file = ref<File | null>(null)

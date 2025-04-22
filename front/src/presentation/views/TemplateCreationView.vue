@@ -6,7 +6,7 @@ const templateName = ref<string>('');
 const templateCategories = ref<string[]>([]);
 const currentCategory = ref<string>('');
 import { CircleMinus } from 'lucide-vue-next';
-import ImagePreviewInput from '../components/base/ImagePreviewInput.vue.vue';
+import ImagePreviewInput from '../components/base/ImagePreviewInput.vue';
 
 const addCategory = () => {
   if (currentCategory.value.trim() !== '') {
