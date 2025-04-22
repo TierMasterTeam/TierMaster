@@ -87,15 +87,13 @@ const removePreviewImage = (index: number) => {
           <div
             v-for="(img, idx) in previewImages"
             :key="idx"
-            class="flex flex-col items-center relative"
+            class="flex flex-col items-center relative cursor-pointer"
             @click="showNameBubble(idx)"
-            style="cursor: pointer;"
           >
             <img :src="img.url" :alt="img.name" class="w-19 h-19 object-cover rounded-md" />
             <button
               @click.stop="removePreviewImage(idx)"
-              class="absolute w-6 h-6 rounded-full bg-light-gray-custom -top-2 -right-3 z-10 flex items-center justify-center cursor-pointer"
-              style="border: none;"
+              class="absolute w-6 h-6 rounded-full bg-light-gray-custom -top-2 -right-3 z-10 flex items-center justify-center cursor-pointer border-none"
               aria-label="Remove image"
             >
               <CircleMinus />
