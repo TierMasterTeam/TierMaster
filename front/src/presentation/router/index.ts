@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import NavBarLayout from '@/layouts/NavBarLayout.vue'
+
 import TierListView from '../views/TierListView.vue'
 
 const router = createRouter({
@@ -6,13 +8,22 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'TierList',
-      component: TierListView,
+      component: NavBarLayout,
+      children: [
+        { path: '', name: 'home', component: TierListView },
+      ],
     },
     {
       path: '/create-template',
-      name: 'create-template',
-      component: () => import('../views/TemplateCreationView.vue'),
+      component: NavBarLayout,
+      children: [
+        { path: '', name: 'create-template', component: () => import('../views/TemplateCreationView.vue') },
+      ],
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: () => import('../views/NotFoundView.vue'),
     },
   ],
 })
