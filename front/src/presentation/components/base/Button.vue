@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Plus, ImageUp, Rows3 } from 'lucide-vue-next'
+import { Plus, ImageUp, Rows3, LogIn } from 'lucide-vue-next'
 
 // Props types
 type Size = 'sm' | 'md' | 'lg'
 type ButtonType = 'button' | 'submit' | 'reset'
-type IconName = 'plus' | 'image-up' | 'rows-3' | ''
+type IconName = 'plus' | 'image-up' | 'rows-3' | 'login' | '';
 
 const props = withDefaults(defineProps<{
   type?: ButtonType
@@ -24,6 +24,7 @@ const iconMap: Record<IconName, any> = {
   'plus': Plus,
   'image-up': ImageUp,
   'rows-3': Rows3,
+  'login': LogIn,
   '': null,
 }
 
@@ -38,7 +39,7 @@ const emit = defineEmits(['click'])
   <button
     :type="type"
     :class="[
-      'flex text-white-custom cursor-pointer items-center gap-2 rounded-lg px-4 py-2 border-b-2 border-r-2 active:border-none transition',
+      'flex text-white-custom cursor-pointer items-center gap-2 rounded-lg px-4 py-2 border-b-2 border-r-2 active:border-none transition font-bold',
       {
         'text-sm py-1 px-3': size === 'sm',
         'text-base py-2 px-4': size === 'md',
