@@ -17,7 +17,21 @@ const router = createRouter({
       path: '/create-template',
       component: NavBarLayout,
       children: [
-        { path: '', name: 'create-template', component: () => import('../views/TemplateCreationView.vue') },
+        { path: '', name: 'createTemplate', component: () => import('../views/TemplateCreationView.vue') },
+      ],
+    },
+    {
+      path: '/privacy-policy',
+      component: NavBarLayout,
+      children: [
+        { path: '', name: 'privacyPolicy', component: () => import('../views/PrivacyPolicyView.vue') },
+      ],
+    },
+    {
+      path: '/terms-of-use',
+      component: NavBarLayout,
+      children: [
+        { path: '', name: 'termsOfUse', component: () => import('../views/TermsOfUseView.vue') },
       ],
     },
     {

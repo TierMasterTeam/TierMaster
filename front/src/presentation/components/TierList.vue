@@ -18,7 +18,7 @@ onUnmounted(() => {
 
 <template>
   <div class="container mx-auto p-4">
-    <h1 v-if="tierListStore.tierList.name" class="text-4xl font-bold text-[#31E7C3] pb-4">
+    <h1 v-if="tierListStore.tierList.name" class="text-4xl font-bold text-[#31E7C3] pb-4 font-jersey">
       {{ tierListStore.tierList.name }} :
     </h1>
 

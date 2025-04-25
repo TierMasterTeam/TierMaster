@@ -63,7 +63,7 @@ const removePreviewImage = (index: number) => {
     <form class="flex gap-2" @submit.prevent="addCategory">
       <BaseInput id="category" type="text" placeholder="category ..." class="mb-4 max-w-sm block"
         v-model="currentCategory" />
-      <Button variant="secondary" type="submit" size="md" icon="plus" class="mb-4">
+      <Button variant="secondary" type="submit" size="md" icon="plus" class="mb-4 h-11"
       </Button>
     </form>
     <ul class="flex flex-wrap pb-4 max-w-xl gap-4">
