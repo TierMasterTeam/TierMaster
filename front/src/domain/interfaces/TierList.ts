@@ -2,18 +2,18 @@ export interface TierList {
   id?: string;
   name: string;
   author: string;
-  cards: cards[];
-  grades: grades[];
+  cards: Card[];
+  grades: Grade[];
 
 }
 
-export interface grades {
+export interface Grade {
   name: string;
   color: string;
-  cards: cards[];
+  cards: Card[];
 }
 
-export interface cards {
+export interface Card {
   name: string;
   image: string;
 }
