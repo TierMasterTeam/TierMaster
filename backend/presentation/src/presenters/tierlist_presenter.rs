@@ -4,12 +4,15 @@ use axum::response::{IntoResponse, Response};
 use serde::{Deserialize, Serialize};
 use domain::entities::TierlistEntity;
 use domain::mappers::EntityMapper;
+use crate::presenters::{CardPresenter, GradePresenter};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TierlistPresenter {
     pub id: String,
     pub name: String,
     pub author: String,
+    pub cards: Vec<CardPresenter>,
+    pub grades: Vec<GradePresenter>,
 }
 
 impl EntityMapper<TierlistEntity> for TierlistPresenter {
@@ -18,6 +21,8 @@ impl EntityMapper<TierlistEntity> for TierlistPresenter {
             id: self.id,
             name: self.name,
             author: self.author,
+            cards: self.cards.into_iter().map(EntityMapper::to_entity).collect(),
+            grades: self.grades.into_iter().map(EntityMapper::to_entity).collect(),
         }
     }
 }
@@ -28,6 +33,8 @@ impl From<TierlistEntity> for TierlistPresenter {
             id: value.id,
             name: value.name,
             author: value.author,
+            cards: value.cards.into_iter().map(Into::into).collect(),
+            grades: value.grades.into_iter().map(Into::into).collect(),
         }
     }
 }

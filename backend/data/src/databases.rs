@@ -48,9 +48,9 @@ impl MongoDB {
         options.credential = Some(credentials);
 
         let client = Client::with_options(options)?;
-
+        
         let database = client.database(&db_name);
-
+        
         println!("Successfully connected to MongoDB");
         Ok(Self(database))
     }
