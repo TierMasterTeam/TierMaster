@@ -1,5 +1,6 @@
 use std::env;
 use mongodb::{Client};
+use mongodb::bson::doc;
 use mongodb::options::{AuthMechanism, ClientOptions, Credential, ServerApi, ServerApiVersion};
 use application::AppState;
 use crate::error::DatabaseError;
@@ -48,9 +49,13 @@ impl MongoDB {
         options.credential = Some(credentials);
 
         let client = Client::with_options(options)?;
-
+        
         let database = client.database(&db_name);
 
+        let result = database.run_command(doc! {"ping": 1}).await;
+        
+        result.expect("Database connection timed out");
+        
         println!("Successfully connected to MongoDB");
         Ok(Self(database))
     }
