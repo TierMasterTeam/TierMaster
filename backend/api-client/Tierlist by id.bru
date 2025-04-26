@@ -1,0 +1,44 @@
+meta {
+  name: Tierlist by id
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{host}}/tierlist/680cde3fa71aefcf59820e88
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Programming Languages",
+    "cards": [{
+      "name": "Python",
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQOS9_2KGa3W7OpKqUzUNNpOV81C_bKrU0uA&s"
+    }],
+    "grades": [{
+      "name": "S",
+      "color": "FFD700",
+      "cards": [{
+        "name": "Rust",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Rust_programming_language_black_logo.svg/1200px-Rust_programming_language_black_logo.svg.png"
+      }]
+    },
+    {
+      "name": "A",
+      "color": "#9ffc53",
+      "cards": [
+              {
+          "name": "c#",
+          "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTGAIPlPCT2-PdrSUXQs0zdrYSezfLFbntaNg&s"
+        },
+        {
+          "name": "JavaScript",
+          "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGdPt8zaqtbQZugI-ZrHhXIL9kMVj3ra_ZYw&s"
+        }
+       ]
+    }
+  ]
+  }
+}
