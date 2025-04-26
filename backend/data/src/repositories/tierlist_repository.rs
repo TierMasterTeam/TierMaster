@@ -1,13 +1,13 @@
+use crate::models::{CardModel, GradeModel, TierlistModel};
 use async_trait::async_trait;
-use futures::StreamExt;
-use mongodb::{Collection, Database};
-use mongodb::bson::doc;
-use mongodb::bson::oid::ObjectId;
-use domain::entities::{CreateTierlistEntity, TierlistEntity};
+use domain::entities::{CreateTierlistEntity, TierlistEntity, UpdateTierlistEntity};
 use domain::error::ApiError;
 use domain::mappers::TryEntityMapper;
 use domain::repositories::AbstractTierlistRepository;
-use crate::models::TierlistModel;
+use futures::StreamExt;
+use mongodb::bson::doc;
+use mongodb::bson::oid::ObjectId;
+use mongodb::{Collection, Database};
 
 #[derive(Clone)]
 pub struct TierlistRepository{
@@ -24,7 +24,7 @@ impl TierlistRepository {
 #[async_trait]
 impl AbstractTierlistRepository for TierlistRepository {
     async fn get_all_tierlists(&self) -> Result<Vec<TierlistEntity>, ApiError> {
-        let cursor = self.collection.find(doc! {}) 
+        let cursor = self.collection.find(doc! {})
             .await
             .map_err(|e| ApiError::InternalError(format!("Failed to execute query: {e}")))?;
 
@@ -34,7 +34,7 @@ impl AbstractTierlistRepository for TierlistRepository {
             })
             .collect()
             .await;
-        
+
         Ok(result)
     }
 
@@ -42,14 +42,9 @@ impl AbstractTierlistRepository for TierlistRepository {
         let id = ObjectId::parse_str(id)
             .map_err(|err| ApiError::BadRequest(err.to_string()))?;
 
-        let tierlist = self.collection.find_one(doc! { "_id": id })
-            .await
-            .map_err(|e| ApiError::InternalError(format!("Failed to execute query: {e}")))?;
+        let tierlist = find_tierlist_by_id(&self.collection, id).await?;
 
-        match tierlist {
-            None => Err(ApiError::NotFound(format!("Tierlist with id {id} not found"))),
-            Some(tierlist) => Ok(tierlist.to_entity()),
-        }
+        Ok(tierlist.to_entity())
     }
 
     async fn get_tierlist_of_user(&self, user_id: &str) -> Result<Vec<TierlistEntity>, ApiError> {
@@ -80,5 +75,33 @@ impl AbstractTierlistRepository for TierlistRepository {
             .map_err(|err| ApiError::InternalError(format!("Failed to execute query: {err}")))?;
 
         Ok(())
+    }
+
+    async fn update_tierlist_by_id(&self, id: &str, tierlist: UpdateTierlistEntity) -> Result<(), ApiError> {
+        let id = ObjectId::parse_str(id)
+            .map_err(|err| ApiError::BadRequest(err.to_string()))?;
+        
+        let mut tierlist_entity = find_tierlist_by_id(&self.collection, id).await?;
+        tierlist_entity.name = tierlist.name;
+        tierlist_entity.cards = tierlist.cards.into_iter().map(CardModel::from).collect();
+        tierlist_entity.grades = tierlist.grades.into_iter().map(GradeModel::from).collect();
+        
+        let query = doc! { "_id": id };
+        self.collection.replace_one(query, tierlist_entity)
+            .await
+            .map_err(|e| ApiError::InternalError(format!("Failed to execute update: {e}")))?;
+
+        Ok(())
+    }
+}
+
+async fn find_tierlist_by_id(collection: &Collection<TierlistModel>, id: ObjectId) -> Result<TierlistModel, ApiError> {
+    let tierlist = collection.find_one(doc! { "_id": id })
+        .await
+        .map_err(|e| ApiError::InternalError(format!("Failed to execute query: {e}")))?;
+
+    match tierlist {
+        None => Err(ApiError::NotFound(format!("Tierlist with id {id} not found"))),
+        Some(tierlist) => Ok(tierlist),
     }
 }

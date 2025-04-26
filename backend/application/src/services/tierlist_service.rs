@@ -1,5 +1,5 @@
 use derive_new::new;
-use domain::entities::{CreateTierlistEntity, TierlistEntity};
+use domain::entities::{CreateTierlistEntity, TierlistEntity, UpdateTierlistEntity};
 use domain::error::ApiError;
 use domain::repositories::AbstractTierlistRepository;
 use std::sync::Arc;
@@ -24,5 +24,9 @@ impl TierlistService {
 
     pub async fn create_tierlist(&self, tierlist: CreateTierlistEntity) -> Result<(), ApiError> {
         self.repo.create_tierlist(tierlist).await
+    }
+
+    pub async fn update_tierlist_by_id(&self, id: &str, tierlist: UpdateTierlistEntity) -> Result<(), ApiError>  {
+        self.repo.update_tierlist_by_id(id, tierlist).await
     }
 }
