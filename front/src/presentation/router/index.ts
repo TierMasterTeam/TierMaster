@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import NavBarLayout from '@/layouts/NavBarLayout.vue'
+import NavBarLayout from '../layouts/NavBarLayout.vue'
 
 import TierListView from '../views/TierListView.vue'
 

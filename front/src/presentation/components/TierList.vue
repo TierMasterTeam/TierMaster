@@ -1,53 +1,59 @@
-<script lang="ts" setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
 import { useTierListStore } from '../stores/tierListStore';
 import { VueDraggable } from 'vue-draggable-plus';
-import ItemCard from './ItemCard.vue';
+import ItemCard from '../components/ItemCard.vue';
 const tierListStore = useTierListStore();
-
 const isDragging = ref(false);
 
-onMounted(() => {
-  tierListStore.connectWebSocket();
+onMounted(async () => {
+  await tierListStore.getTierListById('680cde3fa71aefcf59820e88');
 });
 
-onUnmounted(() => {
-  tierListStore.disconnectWebSocket();
-});
 </script>
 
 <template>
-  <div class="container mx-auto p-4">
-    <h1 v-if="tierListStore.tierList.name" class="text-4xl font-bold text-[#31E7C3] pb-4 font-jersey">
-      {{ tierListStore.tierList.name }} :
+  <div class="container mx-auto p-4" v-if="tierListStore.currentTierlist">
+    <h1 v-if="tierListStore.currentTierlist.name" class="text-4xl font-bold text-[#31E7C3] pb-4 font-jersey">
+      {{ tierListStore.currentTierlist.name }} :
     </h1>
 
     <div class="grid gap-4">
-      <div
-        v-for="tier in tierListStore.tierList.tiers"
-        :key="tier.name"
+      <div v-for="grade in tierListStore.currentTierlist.grades"
+        :key="grade.name"
         class="p-3 rounded-3xl shadow-md flex gap-2 border-2"
       >
         <div
-          :style="{ backgroundColor: tier.color }"
-          class="text-center text-zinc-900 text-2xl mb-2 w-19 h-19 rounded-full flex items-center justify-center"
+          :style="{ backgroundColor: grade.color }"
+          class="text-center text-zinc-900 text-2xl w-19 h-19 rounded-full flex items-center justify-center"
         >
-          {{ tier.name }}
+          {{ grade.name }}
         </div>
-
         <VueDraggable
-          v-model="tier.items"
+          v-model="grade.cards"
           item-key="name"
-          group="tiers"
-          class="flex-1 flex flex-wrap gap-2 rounded-md min-h-[90px]"
+          group="grades"
+          class="flex-1 flex flex-wrap gap-2 rounded-md items-center"
           @start="isDragging = true"
           @end="isDragging = false"
         >
-          <div v-for="item in tier.items" :key="item.name" class="w-19 h-19">
-            <ItemCard :item="item" :tier="tier" :is-dragging="isDragging"/>
+          <div v-for="card in grade.cards" :key="card.name" class="w-19 h-19">
+            <ItemCard :card="card" :grade="grade" :is-dragging="isDragging"/>
           </div>
         </VueDraggable>
       </div>
+      <VueDraggable
+          v-model="tierListStore.currentTierlist.cards"
+          item-key="name"
+          group="grades"
+          class="flex-1 flex flex-wrap gap-2 rounded-md items-center"
+          @start="isDragging = true"
+          @end="isDragging = false"
+        >
+          <div v-for="card in tierListStore.currentTierlist.cards" :key="card.name" class="w-19 h-19">
+            <ItemCard :card="card" :is-dragging="isDragging"/>
+          </div>
+        </VueDraggable>
     </div>
   </div>
 </template>
