@@ -1,11 +1,9 @@
 <script lang="ts" setup>
+import type { cards } from '@/domain/interfaces/TierList';
 import { ref, watch } from 'vue';
-import { type Tier } from '@/domain/interfaces/TierList';
-import { type Item } from '@interfaces/Item';
 
 const props = defineProps<{
-  item: Item;
-  tier: Tier;
+  card: cards;
   isDragging?: boolean;
 }>();
 
@@ -35,7 +33,7 @@ watch(() => props.isDragging, (val) => {
   <div
     class="w-19 h-19 rounded-md flex items-center justify-center bg-cover bg-center bg-no-repeat
  text-white font-bold relative transition-transform item-card"
-    :style="`background-image: url(${item.img});`"
+    :style="`background-image: url(${card.image});`"
     @click="toggleNameBubble"
   >
     <div
@@ -43,7 +41,7 @@ watch(() => props.isDragging, (val) => {
       class="name-bubble"
       @click.stop
     >
-      {{ item.name }}
+      {{ card.name }}
     </div>
   </div>
 </template>

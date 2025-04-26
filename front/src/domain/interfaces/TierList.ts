@@ -1,12 +1,19 @@
-import type { Item } from "./Item";
-
 export interface TierList {
+  id?: string;
   name: string;
-  tiers: Tier[];
+  author: string;
+  cards: cards[];
+  grades: grades[];
+
 }
 
-export interface Tier {
+export interface grades {
   name: string;
   color: string;
-  items: Item[];
+  cards: cards[];
+}
+
+export interface cards {
+  name: string;
+  image: string;
 }
