@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import type { cards } from '@/domain/interfaces/TierList';
+import type { Card } from '@/domain/interfaces/TierList';
 import { ref, watch } from 'vue';
 
 const props = defineProps<{
-  card: cards;
+  card: Card;
   isDragging?: boolean;
 }>();
 
