@@ -14,10 +14,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build
         run: cargo build --verbose
-        working-directory: back
+        working-directory: backend
       - name: Run tests
         run: cargo test --verbose
-        working-directory: back
+        working-directory: backend
 
   frontend:
     runs-on: ubuntu-latest
