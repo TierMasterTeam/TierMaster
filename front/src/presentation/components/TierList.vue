@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import { useTierListStore } from '../stores/tierListStore';
 import { VueDraggable } from 'vue-draggable-plus';
 import ItemCard from '../components/ItemCard.vue';
+import Button from './base/Button.vue';
 const tierListStore = useTierListStore();
 const isDragging = ref(false);
 
@@ -55,7 +56,11 @@ onMounted(async () => {
           </div>
         </VueDraggable>
     </div>
+    <Button type="button" variant="primary" size="md" class="mt-4" @click="tierListStore.saveTierList">
+      Save Tierlist
+    </Button>
   </div>
+
 </template>
 
 <style scoped>
