@@ -1,9 +1,10 @@
-use std::env;
-use mongodb::{Client};
-use mongodb::options::{AuthMechanism, ClientOptions, Credential, ServerApi, ServerApiVersion};
-use application::AppState;
 use crate::error::DatabaseError;
 use crate::repositories::RepositoryFactory;
+use application::AppState;
+use domain::error::ApiError;
+use mongodb::options::{AuthMechanism, ClientOptions, Credential, ServerApi, ServerApiVersion};
+use mongodb::Client;
+use std::env;
 
 pub struct Database;
 
@@ -12,7 +13,9 @@ impl Database {
         let db = MongoDB::connect()
             .await?;
 
-        let factory = RepositoryFactory::init(&db.db());
+        let redis_db = RedisDb::connect().await?;
+
+        let factory = RepositoryFactory::init(&db.db(), redis_db);
 
         Ok(AppState::new(Box::new(factory)))
     }
@@ -58,4 +61,22 @@ impl MongoDB {
     pub fn db(&self) -> &mongodb::Database {
         &self.0
     }
+}
+
+#[derive(Clone)]
+pub struct RedisDb(redis::Client);
+
+impl RedisDb {
+    pub async fn connect() -> Result<Self, DatabaseError> {
+        let uri = env::var("REDIS_URL")
+            .unwrap_or("redis://localhost:6379".to_string());
+
+        let client = redis::Client::open(uri)
+            .map_err(|e| DatabaseError::from(
+                ApiError::InternalError(format!("Failed to connect to redis : {e}"))))?;
+
+        Ok(Self(client))
+    }
+
+    pub fn client(&self) -> &redis::Client {&self.0}
 }

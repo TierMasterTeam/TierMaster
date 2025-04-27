@@ -1,5 +1,6 @@
 use crate::error::ApiErrorResponse;
 use crate::presenters::{CreateTierlistPresenter, TierlistPresenter, UpdateTierlistPresenter};
+use crate::states::AuthSession;
 use application::AppState;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
@@ -25,6 +26,7 @@ impl TierlistController {
 }
 
 async fn create_tierlist (
+    auth: AuthSession,
     State(state): State<Arc<AppState>>,
     Json(tierlist): Json<CreateTierlistPresenter>,
 ) -> Result<StatusCode, ApiErrorResponse> {
@@ -39,6 +41,7 @@ async fn create_tierlist (
 }
 
 async fn update_tierlist_by_id(
+    auth: AuthSession,
     State(state): State<Arc<AppState>>,
     Path(id): Path<String>,
     Json(tierlist): Json<UpdateTierlistPresenter>,
@@ -75,10 +78,13 @@ async fn get_tierlist_by_id(
 }
 
 async fn get_tierlists_of_user(
+    auth: AuthSession,
     Path(id): Path<String>,
     State(state): State<Arc<AppState>>,
 ) -> Result<Json<Vec<TierlistPresenter>>, ApiErrorResponse> {
-
+    
+    // TODO : add logic to check if user (auth.user_id) has the right to see tierlist 
+    
     let result = state.services()
         .tierlist()
         .get_tierlists_of_user(id.as_str())
