@@ -6,6 +6,7 @@ pub enum ApiError {
     NotFound(String),
     InternalError(String),
     BadRequest(String),
+    Unauthorized(String),
 }
 
 impl Display for ApiError {

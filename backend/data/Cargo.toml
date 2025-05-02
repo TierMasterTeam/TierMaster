@@ -14,3 +14,4 @@ async-trait = {workspace = true}
 futures = {workspace = true}
 
 mongodb = "3.2.3"
+redis = "0.30.0"

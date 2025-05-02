@@ -1,6 +1,8 @@
+use crate::repositories::{AbstractAuthRepository, AbstractRedisRepository, AbstractTierlistRepository};
 use std::sync::Arc;
-use crate::repositories::AbstractTierlistRepository;
 
 pub trait AbstractRepositoryFactory {
     fn tierlist(&self) -> Arc<dyn AbstractTierlistRepository>;
+    fn auth(&self) -> Arc<dyn AbstractAuthRepository>;
+    fn redis(&self) -> Arc<dyn AbstractRedisRepository>;
 }

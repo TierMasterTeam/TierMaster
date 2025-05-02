@@ -1,9 +1,9 @@
+use crate::controllers::{AuthController, TierlistController};
+use application::AppState;
+use axum::routing::get;
+use axum::Router;
 use std::env;
 use std::sync::Arc;
-use axum::Router;
-use axum::routing::get;
-use application::AppState;
-use crate::controllers::TierlistController;
 
 pub struct Server;
 
@@ -30,6 +30,7 @@ fn routes() -> Router<Arc<AppState>> {
             let version = env!("CARGO_PKG_VERSION");
             format!("Welcome to TierMaster's API\nAPI Version: {version}")
         }))
+        .merge(AuthController::get_router())
         .merge(TierlistController::get_router());
 
     Router::new()

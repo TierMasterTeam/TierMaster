@@ -19,6 +19,7 @@ impl From<ApiError> for ApiErrorResponse {
             ApiError::NotFound(msg) => (StatusCode::NOT_FOUND, msg),
             ApiError::InternalError(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg),
             ApiError::BadRequest(msg) => (StatusCode::BAD_REQUEST, msg),
+            ApiError::Unauthorized(msg) => (StatusCode::UNAUTHORIZED, msg)
         };
 
         Self { code, message }
