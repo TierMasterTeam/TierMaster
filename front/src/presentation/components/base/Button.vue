@@ -39,7 +39,7 @@ const emit = defineEmits(['click'])
   <button
     :type="type"
     :class="[
-      'flex text-white-custom cursor-pointer items-center gap-2 rounded-lg px-4 py-2 border-b-2 border-r-2 active:border-none transition font-bold',
+      'flex text-white-custom cursor-pointer items-center gap-2 rounded-lg px-4 py-2 border-b-2 border-r-2 active:border-transparent active:translate-x-[2px] active:translate-y-[2px] transition font-bold',
       {
         'text-sm py-1 px-3': size === 'sm',
         'text-base py-2 px-4': size === 'md',
