@@ -22,19 +22,29 @@ const REFRESH_TOKEN_EXPIRATION: u64 = 604800; // 1 week
 const MAX_USER_SESSION_DURATION: u64 = 86400 * 30 * 3; // ~ 3 months
 
 impl AuthService {
-    pub async fn login(&self, credentials: CredentialsEntity) -> Result<String, ApiError> {
+    pub async fn login(&self, credentials: CredentialsEntity) -> Result<(String, UserEntity), ApiError> {
         let user = self.verify_credentials(credentials).await?;
-        let user_id = user.id;
+        let user_id = user.id.clone();
 
+        let existing_refresh_token = self.redis.fetch(user_id.as_str()).await;
+        if existing_refresh_token.is_ok() { 
+            // don't generate a new refresh token, only an access token
+            let token = self.generate_token().await?;
+            let refresh_token = existing_refresh_token?;
+            self.store_token_session(token.as_str(), refresh_token.as_str(), user_id.as_str()).await?;
+            
+            return Ok((token, user));
+        }
+        
         let token = self.generate_token().await?;
         let refresh_token = self.generate_token().await?;
 
-        self.store_session_in_redis(token.as_str(), refresh_token.as_str(), user_id).await?;
+        self.store_full_session(token.as_str(), refresh_token.as_str(), user_id.as_str()).await?;
 
-        Ok(token)
+        Ok((token, user))
     }
 
-    pub async fn signup(&self, credentials: CredentialsEntity) -> Result<String, ApiError> {
+    pub async fn signup(&self, credentials: CredentialsEntity) -> Result<(String, UserEntity), ApiError> {
         if credentials.username.is_none() {
             return Err(ApiError::BadRequest("The username is required to create an account".to_string()));
         }
@@ -48,14 +58,16 @@ impl AuthService {
         };
 
         self.repo.create_user(user).await?;
-
+        
         self.login(credentials).await
     }
 
     pub async fn verify_credentials(&self, credentials: CredentialsEntity) -> Result<UserEntity, ApiError> {
         let user_entity = self.repo.get_user_by_email(credentials.email.as_str()).await?;
+        let password_hash = user_entity.password_hash.clone()
+            .ok_or(ApiError::InternalError(format!("UserEntity from DB has no password (id: {})", user_entity.id)))?;
 
-        let password_hash_in_db = PasswordHash::new(&user_entity.password_hash.as_ref())
+        let password_hash_in_db = PasswordHash::new(&password_hash.as_ref())
             .map_err(|_| ApiError::InternalError("Failed to parse hashed password".to_string()))?;
 
         if Argon2::default().verify_password(credentials.password.as_bytes(), &password_hash_in_db).is_ok() {
@@ -102,7 +114,7 @@ impl AuthService {
 
         let new_token = self.generate_token().await?;
         let new_refresh_token = self.generate_token().await?;
-        self.store_session_in_redis(new_token.as_str(), new_refresh_token.as_str(), user_id.clone()).await?;
+        self.store_full_session(new_token.as_str(), new_refresh_token.as_str(), user_id.as_str()).await?;
 
         Ok((new_token, user_id))
     }
@@ -113,25 +125,41 @@ impl AuthService {
         Ok(())
     }
 
-    async fn store_session_in_redis(&self, token: &str, refresh_token: &str, user_id: String) -> Result<(), ApiError> {
-        self.store_use_id(token, refresh_token, user_id).await?;
-        self.store_refresh_token(token, refresh_token).await?;
+    /// store all info for both access token and refresh token
+    async fn store_full_session(&self, token: &str, refresh_token: &str, user_id: &str) -> Result<(), ApiError> {
+        self.store_user_id_with_token(token, user_id).await?;
+        self.store_user_id_with_refresh_token(refresh_token, user_id.clone()).await?;
+        
+        self.store_refresh_token_with_token(token, refresh_token).await?;
+        self.store_refresh_token_with_user_id(user_id, refresh_token).await?;
+        
         self.store_start_session_timestamp(refresh_token).await
     }
+    
+    /// store info only for the access token
+    async fn store_token_session(&self, token: &str, refresh_token: &str, user_id: &str) -> Result<(), ApiError> {
+        self.store_refresh_token_with_token(token, refresh_token).await?;
+        self.store_user_id_with_token(token, user_id).await
+    }
+    
+    async fn store_user_id_with_refresh_token(&self, refresh_token: &str, user_id: &str) -> Result<(), ApiError> {
+        self.redis.store(refresh_token, user_id.to_string(), Some(REFRESH_TOKEN_EXPIRATION)).await
+    }
+    
+    async fn store_user_id_with_token(&self, token: &str, user_id: &str) -> Result<(), ApiError> {
+        self.redis.store(token, user_id.to_string(), Some(TOKEN_EXPIRATION)).await
+    }
+    
+    async fn store_refresh_token_with_user_id(&self, user_id: &str, refresh_token: &str) -> Result<(), ApiError> {
+        self.redis.store(user_id, refresh_token.to_string(), Some(REFRESH_TOKEN_EXPIRATION)).await
+    }
 
-    async fn store_refresh_token(&self, token: &str, refresh_token: &str) -> Result<(), ApiError> {
-        // {token}_refresh_token : refresh_token
+    async fn store_refresh_token_with_token(&self, token: &str, refresh_token: &str) -> Result<(), ApiError> {
         let refresh_token_key = &format!("{token}_refresh_token");
         self.redis.store(refresh_token_key, refresh_token.to_string(), Some(REFRESH_TOKEN_EXPIRATION)).await
     }
-
-    async fn store_use_id(&self, token: &str, refresh_token: &str, user_id: String) -> Result<(), ApiError> {
-        self.redis.store(token, user_id.clone(), Some(TOKEN_EXPIRATION)).await?;
-        self.redis.store(refresh_token, user_id.clone(), Some(REFRESH_TOKEN_EXPIRATION)).await
-    }
-
+    
     async fn store_start_session_timestamp(&self, refresh_token: &str) -> Result<(), ApiError> {
-        // {refresh_token}_start_session : current_timestamp
         let user_session_key = &format!("{refresh_token}_start_session");
         self.redis.store(user_session_key, Utc::now().timestamp().to_string(), Some(MAX_USER_SESSION_DURATION)).await
     }

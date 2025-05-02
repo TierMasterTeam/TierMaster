@@ -8,7 +8,8 @@ pub struct UserModel {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     pub id: Option<ObjectId>,
     pub email: String,
-    pub password_hash: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub password_hash: Option<String>, // can't update password without specific route
     pub username: String,
 }
 
@@ -43,7 +44,7 @@ impl From<CreateUserEntity> for UserModel {
         Self {
             id: None,
             email: value.email,
-            password_hash: value.password_hash,
+            password_hash: Some(value.password_hash),
             username: value.username
         }
     }

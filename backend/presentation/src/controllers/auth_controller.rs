@@ -1,9 +1,8 @@
 use crate::error::ApiErrorResponse;
-use crate::presenters::CredentialsPresenter;
+use crate::presenters::{CredentialsPresenter, UserPresenter};
 use application::AppState;
 use axum::extract::State;
 use axum::http::header::SET_COOKIE;
-use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::routing::post;
 use axum::{Json, Router};
@@ -26,17 +25,12 @@ async fn login(
     Json(credentials): Json<CredentialsPresenter>,
 ) -> Result<impl IntoResponse, ApiErrorResponse> {
     
-    let token = state.services
+    let (token, user) = state.services
         .auth()
         .login(credentials.to_entity())
         .await?;
-    
-    let cookie_value = format!("token={token}; HttpOnly; Path=/; Max-Age=3600"); // 1 hour
-    
-    let mut response = StatusCode::OK.into_response();
-    response.headers_mut().insert(SET_COOKIE, cookie_value.parse().unwrap());
 
-    Ok(response)
+    make_auth_response(token, UserPresenter::from(user))
 }
 
 async fn signup(    
@@ -44,16 +38,21 @@ async fn signup(
     Json(credentials): Json<CredentialsPresenter>,
 ) -> Result<impl IntoResponse, ApiErrorResponse> {
 
-    let token = state.services
+    let (token, user) = state.services
         .auth()
         .signup(credentials.to_entity())
         .await?;
 
-    let cookie_value = format!("token={token}; HttpOnly; Secure; Path=/; Max-Age=3600"); // 1 hour
+    make_auth_response(token, UserPresenter::from(user))
+}
+
+fn make_auth_response(token: String, user: UserPresenter) -> Result<impl IntoResponse, ApiErrorResponse> {
+    // TODO adding our website domain when dotenv is setup ( Domain=.tiermaster.app )
+    let cookie_value = format!("token={token}; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=3600"); // 1 hour
     let parsed_cookie = cookie_value.parse()
         .map_err(|e| ApiError::InternalError(format!("Failed to parse cookie string : {e}")))?;
 
-    let mut response = StatusCode::OK.into_response();
+    let mut response = Json(user).into_response();
     response.headers_mut().insert(SET_COOKIE, parsed_cookie);
 
     Ok(response)
