@@ -1,11 +1,15 @@
 meta {
   name: get tierlist
   type: http
-  seq: 4
+  seq: 3
 }
 
 get {
   url: {{host}}/tierlist/680cde3fa71aefcf59820e88
   body: none
   auth: inherit
+}
+
+headers {
+  set-cookie: token=u3QvjSSZTqE4xU_lzFNGseN42C3idZ6flcWX7HoEWZY.T91eb4sW4NcMzY__qNylwhhaOy_bwqEaut5Vl_96rGM; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=3600
 }

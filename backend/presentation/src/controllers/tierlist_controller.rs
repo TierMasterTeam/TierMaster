@@ -26,7 +26,7 @@ impl TierlistController {
 }
 
 async fn create_tierlist (
-    auth: AuthSession,
+    _auth: AuthSession,
     State(state): State<Arc<AppState>>,
     Json(tierlist): Json<CreateTierlistPresenter>,
 ) -> Result<StatusCode, ApiErrorResponse> {
@@ -41,7 +41,7 @@ async fn create_tierlist (
 }
 
 async fn update_tierlist_by_id(
-    auth: AuthSession,
+    _auth: AuthSession,
     State(state): State<Arc<AppState>>,
     Path(id): Path<String>,
     Json(tierlist): Json<UpdateTierlistPresenter>,
@@ -78,7 +78,7 @@ async fn get_tierlist_by_id(
 }
 
 async fn get_tierlists_of_user(
-    auth: AuthSession,
+    _auth: AuthSession,
     Path(id): Path<String>,
     State(state): State<Arc<AppState>>,
 ) -> Result<Json<Vec<TierlistPresenter>>, ApiErrorResponse> {

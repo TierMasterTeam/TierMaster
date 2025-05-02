@@ -1,11 +1,11 @@
 meta {
-  name: ping
+  name: Logout
   type: http
   seq: 4
 }
 
-get {
-  url: {{host}}
+post {
+  url: {{host}}/auth/logout
   body: none
   auth: inherit
 }
