@@ -4,6 +4,8 @@ use axum::routing::get;
 use axum::Router;
 use std::env;
 use std::sync::Arc;
+use tower_http::cors::{CorsLayer, Any};
+use axum::http::{Method, header};
 
 pub struct Server;
 
@@ -25,6 +27,17 @@ impl Server {
 
 
 fn routes() -> Router<Arc<AppState>> {
+    let origins = [
+        "http://localhost:5173".parse().unwrap(),
+        "https://tiermaster.app".parse().unwrap(),
+    ];
+    //CORS config
+    let cors = CorsLayer::new()
+        .allow_origin(origins)
+        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE, Method::OPTIONS])
+        .allow_headers([header::AUTHORIZATION,header::CONTENT_TYPE, header::ACCEPT,header::ORIGIN,])
+        .allow_credentials(true);
+
     let api = Router::new()
         .route("/", get(|| async {
             let version = env!("CARGO_PKG_VERSION");
@@ -35,4 +48,5 @@ fn routes() -> Router<Arc<AppState>> {
 
     Router::new()
         .nest("/api", api)
+        .layer(cors)
 }

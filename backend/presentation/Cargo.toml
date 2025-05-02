@@ -6,6 +6,7 @@ edition.workspace = true
 [dependencies]
 domain = { path = "../domain" }
 application = { path = "../application" }
+tower-http = { version = "0.6.2", features = ["cors"] }
 
 # Uncomment if needed
 serde = {workspace = true}
