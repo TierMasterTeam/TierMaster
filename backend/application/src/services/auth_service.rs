@@ -1,9 +1,8 @@
+use crate::services::auth_redis_service::AuthRedisService;
 use argon2::password_hash::rand_core::{OsRng, RngCore};
 use argon2::{password_hash::PasswordHasher, password_hash::PasswordVerifier, password_hash::SaltString, Argon2, PasswordHash};
 use base64::engine::general_purpose;
 use base64::Engine;
-use chrono::offset::Utc;
-use derive_new::new;
 use domain::entities::{CreateUserEntity, CredentialsEntity, UserEntity};
 use domain::error::ApiError;
 use domain::repositories::{AbstractAuthRepository, AbstractRedisRepository};
@@ -11,35 +10,45 @@ use hmac::{Hmac, KeyInit, Mac};
 use sha2::Sha256;
 use std::sync::Arc;
 
-#[derive(new)]
-pub struct AuthService{
+pub struct AuthService {
     repo: Arc<dyn AbstractAuthRepository>,
-    redis: Arc<dyn AbstractRedisRepository>,
+    redis_service: AuthRedisService
 }
 
-const TOKEN_EXPIRATION: u64 = 3600; // 1 hour
-const REFRESH_TOKEN_EXPIRATION: u64 = 604800; // 1 week
-const MAX_USER_SESSION_DURATION: u64 = 86400 * 30 * 3; // ~ 3 months
-
 impl AuthService {
+    pub(crate) fn new(repo: Arc<dyn AbstractAuthRepository>, redis: Arc<dyn AbstractRedisRepository>) -> Self {
+        Self {
+            repo,
+            redis_service: AuthRedisService::new(redis),
+        }
+    }
+
+    pub async fn logout(&self, token: String) -> Result<(), ApiError> {
+        self.redis_service.remove_token_session(token.as_str()).await?;
+
+        Ok(())
+    }
+
     pub async fn login(&self, credentials: CredentialsEntity) -> Result<(String, UserEntity), ApiError> {
         let user = self.verify_credentials(credentials).await?;
         let user_id = user.id.clone();
 
-        let existing_refresh_token = self.redis.fetch(user_id.as_str()).await;
-        if existing_refresh_token.is_ok() { 
+        let existing_refresh_token = self.redis_service
+            .fetch_refresh_token_with_user_id(user_id.as_str()).await;
+        
+        if existing_refresh_token.is_ok() {
             // don't generate a new refresh token, only an access token
             let token = self.generate_token().await?;
             let refresh_token = existing_refresh_token?;
-            self.store_token_session(token.as_str(), refresh_token.as_str(), user_id.as_str()).await?;
-            
+            self.redis_service.store_token_session(token.as_str(), refresh_token.as_str(), user_id.as_str()).await?;
+
             return Ok((token, user));
         }
-        
+
         let token = self.generate_token().await?;
         let refresh_token = self.generate_token().await?;
 
-        self.store_full_session(token.as_str(), refresh_token.as_str(), user_id.as_str()).await?;
+        self.redis_service.store_full_session(token.as_str(), refresh_token.as_str(), user_id.as_str()).await?;
 
         Ok((token, user))
     }
@@ -58,7 +67,7 @@ impl AuthService {
         };
 
         self.repo.create_user(user).await?;
-        
+
         self.login(credentials).await
     }
 
@@ -98,70 +107,30 @@ impl AuthService {
     }
 
     pub async fn validate_session(&self, token: &str) -> Result<(String, String), ApiError> {
-        match self.redis.fetch(token).await {
-            Err(e) => self.try_to_refresh_session(token).await,
+        match self.redis_service.fetch_user_id(token).await {
+            Err(_) => self.try_to_refresh_session(token).await,
             Ok(user_id) => Ok((token.to_string(), user_id))
         }
     }
 
     async fn try_to_refresh_session(&self, token: &str) -> Result<(String, String), ApiError> {
-        let refresh_token_key = format!("{token}_refresh_token");
-        let refresh_token = self.redis.fetch(refresh_token_key.as_str()).await?;
+        let refresh_token = self.redis_service.fetch_refresh_token_with_token(token).await?;
 
-        let user_id = self.redis.fetch(refresh_token.as_str()).await?;
+        let user_id = self.redis_service.fetch_user_id(refresh_token.as_str()).await?;
 
         self.check_use_session_duration_still_valid(refresh_token.as_str()).await?;
 
         let new_token = self.generate_token().await?;
         let new_refresh_token = self.generate_token().await?;
-        self.store_full_session(new_token.as_str(), new_refresh_token.as_str(), user_id.as_str()).await?;
+        self.redis_service.store_full_session(new_token.as_str(), new_refresh_token.as_str(), 
+                                              user_id.as_str()).await?;
 
         Ok((new_token, user_id))
     }
 
     async fn check_use_session_duration_still_valid(&self, refresh_token: &str) -> Result<(), ApiError> {
-        let user_start_session_key = format!("{refresh_token}_start_session");
-        self.redis.fetch(user_start_session_key.as_str()).await?;
+        self.redis_service.fetch_start_session_timestamp(refresh_token).await?;
         Ok(())
-    }
-
-    /// store all info for both access token and refresh token
-    async fn store_full_session(&self, token: &str, refresh_token: &str, user_id: &str) -> Result<(), ApiError> {
-        self.store_user_id_with_token(token, user_id).await?;
-        self.store_user_id_with_refresh_token(refresh_token, user_id.clone()).await?;
-        
-        self.store_refresh_token_with_token(token, refresh_token).await?;
-        self.store_refresh_token_with_user_id(user_id, refresh_token).await?;
-        
-        self.store_start_session_timestamp(refresh_token).await
-    }
-    
-    /// store info only for the access token
-    async fn store_token_session(&self, token: &str, refresh_token: &str, user_id: &str) -> Result<(), ApiError> {
-        self.store_refresh_token_with_token(token, refresh_token).await?;
-        self.store_user_id_with_token(token, user_id).await
-    }
-    
-    async fn store_user_id_with_refresh_token(&self, refresh_token: &str, user_id: &str) -> Result<(), ApiError> {
-        self.redis.store(refresh_token, user_id.to_string(), Some(REFRESH_TOKEN_EXPIRATION)).await
-    }
-    
-    async fn store_user_id_with_token(&self, token: &str, user_id: &str) -> Result<(), ApiError> {
-        self.redis.store(token, user_id.to_string(), Some(TOKEN_EXPIRATION)).await
-    }
-    
-    async fn store_refresh_token_with_user_id(&self, user_id: &str, refresh_token: &str) -> Result<(), ApiError> {
-        self.redis.store(user_id, refresh_token.to_string(), Some(REFRESH_TOKEN_EXPIRATION)).await
-    }
-
-    async fn store_refresh_token_with_token(&self, token: &str, refresh_token: &str) -> Result<(), ApiError> {
-        let refresh_token_key = &format!("{token}_refresh_token");
-        self.redis.store(refresh_token_key, refresh_token.to_string(), Some(REFRESH_TOKEN_EXPIRATION)).await
-    }
-    
-    async fn store_start_session_timestamp(&self, refresh_token: &str) -> Result<(), ApiError> {
-        let user_session_key = &format!("{refresh_token}_start_session");
-        self.redis.store(user_session_key, Utc::now().timestamp().to_string(), Some(MAX_USER_SESSION_DURATION)).await
     }
 
     async fn generate_token(&self) -> Result<String, ApiError> {
