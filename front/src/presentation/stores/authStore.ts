@@ -32,7 +32,7 @@ export const useAuthStore = defineStore('authStore', () => {
 
   const login = async (credentials: LoginCredentials) => {
     try {
-      const res = await api.post('login', { json: credentials })
+      const res = await api.post('auth/login', { json: credentials })
       if (res.status === 200) {
         isLoggedIn.value = true
         return true
@@ -45,7 +45,7 @@ export const useAuthStore = defineStore('authStore', () => {
 
   const register = async (credentials: RegisterCredentials) => {
     try {
-      const res = await api.post('register', { json: credentials })
+      const res = await api.post('auth/register', { json: credentials })
       if (res.status === 200) {
         return true
       }
@@ -55,6 +55,20 @@ export const useAuthStore = defineStore('authStore', () => {
     return false
   }
 
-  return { isLoggedIn, user, login, register, checkAuth }
+  const logout = async () => {
+    try {
+      const res = await api.post('auth/logout')
+      if (res.status === 200) {
+        isLoggedIn.value = false
+        user.value = null
+        return true
+      }
+    } catch (error) {
+      console.error('Logout failed:', error)
+    }
+    return false
+  }
+
+  return { isLoggedIn, user, login, register, checkAuth, logout }
 })
 
