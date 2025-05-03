@@ -3,16 +3,42 @@ import BaseInput from '../components/base/BaseInput.vue';
 import Button from '../components/base/Button.vue';
 import { ref } from 'vue';
 import { Eye, EyeOff } from 'lucide-vue-next';
+import { useAuthStore } from '../stores/authStore';
+import { useRouter } from 'vue-router';
+import { useUtilsStore } from '../stores/utilsStore';
+
+const showToast = useUtilsStore().showToast;
+
+const router = useRouter();
+
+const authStore = useAuthStore();
 
 const username = ref('');
+const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 
-const useRegister = () => {
-    // Implement your login logic here
-    console.log('Login button clicked');
+const useRegister = async () => {
+    if (password.value !== confirmPassword.value) {
+        showToast('Passwords do not match', 'error');
+        return;
+    }
+
+    try {
+        await authStore.register({
+            email: email.value,
+            username: username.value,
+            password: password.value,
+        });
+        showToast('Registration successful', 'success');
+        router.push({ name: 'login' });
+    } catch (error) {
+        showToast('Registration fail', 'error');
+        console.error('Registration error:', error);
+        showToast('Registration failed', 'error');
+    }
 };
 </script>
 
@@ -23,7 +49,7 @@ const useRegister = () => {
                 <img src="../../assets/logo.svg" width="167" height="132" alt="Logo" />
                 <div class="flex flex-col md:flex-row md:items-center justify-between h-full gap-6">
                     <div class="h-full flex flex-col justify-between gap-2">
-                        <BaseInput type="text" placeholder="Username" class="block mt-1 h-12 w-80" v-model="username" />
+                        <BaseInput type="text" placeholder="Username" class="block mt-1 h-12 w-80"  v-model="username" />
                         <BaseInput :type="showPassword ? 'text' : 'password'" placeholder="Password" class="block h-12 mb-1 w-80" v-model="password">
                             <template #right>
                                 <button type="button" @click="showPassword = !showPassword" tabindex="-1" aria-label="Afficher ou masquer le mot de passe">
@@ -33,7 +59,7 @@ const useRegister = () => {
                         </BaseInput>
                     </div>
                     <div class="h-full flex flex-col justify-between gap-2">
-                        <BaseInput type="text" placeholder="Username" class="block mt-1 h-12 w-80" />
+                        <BaseInput type="email" placeholder="example@email.com" class="block mt-1 h-12 w-80" v-model="email" />
                         <BaseInput :type="showConfirmPassword ? 'text' : 'password'" placeholder="Confirm Password" class="block h-12 mb-1 w-80" v-model="confirmPassword">
                             <template #right>
                                 <button type="button" @click="showConfirmPassword = !showConfirmPassword" tabindex="-1" aria-label="Afficher ou masquer le mot de passe">

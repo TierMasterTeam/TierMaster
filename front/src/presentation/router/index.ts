@@ -1,11 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import NavBarLayout from '../layouts/NavBarLayout.vue'
-
 import TierListView from '../views/TierListView.vue'
+import { useAuthStore } from '@stores/authStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    // Public routes
     {
       path: '/',
       component: NavBarLayout,
@@ -13,9 +14,11 @@ const router = createRouter({
         { path: '', name: 'home', component: TierListView },
       ],
     },
+    // Protected routes
     {
       path: '/create-template',
       component: NavBarLayout,
+      meta: { requiresAuth: true },
       children: [
         { path: '', name: 'createTemplate', component: () => import('../views/TemplateCreationView.vue') },
       ],
@@ -50,6 +53,20 @@ const router = createRouter({
       component: () => import('../views/NotFoundView.vue'),
     },
   ],
+})
+
+// navigation guard
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore()
+  const requiresAuth = to.meta.requiresAuth || false
+  
+  const isAuthenticated = await authStore.checkAuth()
+  
+  if (requiresAuth && !isAuthenticated) {
+    next({ name: 'login', query: { redirect: to.fullPath } })
+  } else {
+    next()
+  }
 })
 
 export default router
