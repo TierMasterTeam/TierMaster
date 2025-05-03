@@ -30,6 +30,45 @@ export const useTierListStore = defineStore('tierList', () => {
     }
   }
 
+  const createTemplate = async (template: TierList) => {
+    try {
+      const response = await api.post('tierlist', {
+        json: template
+      });
+      const data = await response.json() as string
+      return data
+      showToast('Template created successfully', 'success', 2000)
+    } catch (error) {
+      showToast('Failed to create template', 'error', 2000)
+    }
+  }
 
-  return { getTierListById, saveTierList, currentTierlist }
+  const updateTemplate = async (template: TierList) => {
+    try {
+      const response = await api.put('tierlist', {
+        json: template
+      });
+      await response.json()
+      showToast('Template updated successfully', 'success', 2000)
+    } catch (error) {
+      showToast('Failed to update template', 'error', 2000)
+    }
+  }
+
+  const uploadImages = async (formData: FormData) => {
+    try {
+      const response = await api.post('image', {
+        body: formData
+      });
+      const data = await response.json() as string[]
+      showToast('Images uploaded successfully', 'success', 2000)
+      return data
+    } catch (error) {
+      showToast('Failed to upload images', 'error', 2000)
+    }
+  }
+
+
+
+  return { getTierListById, saveTierList, currentTierlist, createTemplate, updateTemplate, uploadImages }
 })
