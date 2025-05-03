@@ -3,15 +3,43 @@ import BaseInput from '../components/base/BaseInput.vue';
 import Button from '../components/base/Button.vue';
 import { ref } from 'vue';
 import { Eye, EyeOff } from 'lucide-vue-next';
+import { useAuthStore } from '../stores/authStore';
+import { useUtilsStore } from '../stores/utilsStore';
+import { useRoute, useRouter } from 'vue-router';
+
+const route = useRoute();
+const router = useRouter();
 
 const username = ref('');
 const password = ref('');
 const showPassword = ref(false);
+const authStore = useAuthStore();
+const showToast = useUtilsStore().showToast;
 
-const useLogin = () => {
-    // Implement your login logic here
-    console.log('Login button clicked');
+const useLogin = async () => {
+  try {
+    const success = await authStore.login({ 
+      email: username.value, 
+      password: password.value 
+    });
+
+    if (success) {
+      showToast('Login successful', 'success');
+
+      let redirect = route.query.redirect;
+      if (typeof redirect === 'string') {
+        router.push(redirect);
+      } else {
+        router.push({ name: 'home' });
+      }
+    } else {
+      showToast('Login failed', 'error');
+    }
+  } catch (error) {
+    showToast('Unable to connect to server', 'error');
+  }
 };
+
 </script>
 
 <template>

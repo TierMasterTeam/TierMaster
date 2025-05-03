@@ -24,9 +24,9 @@ export const useTierListStore = defineStore('tierList', () => {
       await api.put(`tierlist/${currentTierlist.value.id}`, {
         json: currentTierlist.value
       });
-      showToast('Tier list updated successfully', true, 2000)
+      showToast('Tier list updated successfully', 'success', 2000)
     } catch (error) {
-      showToast('Failed to update tier list', false, 2000)
+      showToast('Failed to update tier list', 'error', 2000)
     }
   }
 

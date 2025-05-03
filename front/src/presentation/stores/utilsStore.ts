@@ -10,9 +10,9 @@ export const useUtilsStore = defineStore('utils', () => {
         isVisible: false,
     });
 
-    const showToast = (error: string, isSuccess: boolean, timeout?: number ) => {
+    const showToast = (error: string, isSuccess: 'success' | 'error', timeout?: number ) => {
         toast.value.isVisible = true;
-        toast.value.isSuccess = isSuccess;
+        toast.value.isSuccess = isSuccess === 'success';
         toast.value.content = error;
         setTimeout(() => {
             toast.value.isVisible = false;
