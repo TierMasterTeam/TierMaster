@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use crate::services::{AuthService, TierlistService, UserService};
 use domain::repositories::AbstractRepositoryFactory;
 
@@ -8,7 +9,7 @@ pub struct ServiceFactory {
 }
 
 impl ServiceFactory {
-    pub fn init(factory: Box<dyn AbstractRepositoryFactory>) -> Self {
+    pub fn init(factory: Arc<dyn AbstractRepositoryFactory>) -> Self {
         Self {
             tierlist: TierlistService::new(factory.tierlist()),
             user: UserService::new(factory.user()),

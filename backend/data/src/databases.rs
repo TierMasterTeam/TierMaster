@@ -1,23 +1,45 @@
 use crate::error::DatabaseError;
-use crate::repositories::RepositoryFactory;
+use std::env;
+use std::sync::Arc;
+use aws_config::{BehaviorVersion};
+use aws_sdk_s3::Client as S3Client;
+use mongodb::{Client, Database};
+use mongodb::options::{AuthMechanism, ClientOptions, Credential, ServerApi, ServerApiVersion};
 use application::AppState;
 use domain::error::ApiError;
-use mongodb::options::{AuthMechanism, ClientOptions, Credential, ServerApi, ServerApiVersion};
-use mongodb::Client;
-use std::env;
+use crate::repositories::RepositoryFactory;
 
-pub struct Database;
+pub struct Databases {
+    mongo: MongoDB,
+    aws_bucket: AwsBucket,
+}
 
-impl Database {
+impl Databases {
     pub async fn connect() -> Result<AppState, DatabaseError> {
-        let db = MongoDB::connect()
+        let mongo = MongoDB::connect()
             .await?;
 
+        let aws_bucket = AwsBucket::connect()
+            .await;
+
+        let databases = Databases {
+            mongo,
+            aws_bucket,
+        };
+
+        let factory = RepositoryFactory::init(&databases);
         let redis_db = RedisDb::connect().await?;
 
         let factory = RepositoryFactory::init(&db.db(), redis_db);
 
-        Ok(AppState::new(Box::new(factory)))
+        Ok(AppState::new(Arc::new(factory)))
+    }
+
+    pub fn mongo(&self) -> &Database {
+        self.mongo.db()
+    }
+    pub fn aws_bucket(&self) -> &S3Client {
+        &self.aws_bucket.client()
     }
 }
 
@@ -79,4 +101,21 @@ impl RedisDb {
     }
 
     pub fn client(&self) -> &redis::Client {&self.0}
+}
+
+
+pub struct AwsBucket(S3Client);
+impl AwsBucket {
+    pub async fn connect() ->Self {
+        let config = aws_config::defaults(BehaviorVersion::v2025_01_17())
+            .endpoint_url(env::var("R2_ENDPOINT").unwrap_or_default())
+            .load().await;
+
+        let client = S3Client::new(&config);
+
+        Self(client)
+    }
+    pub fn client(&self) -> &S3Client {
+        &self.0
+    }
 }

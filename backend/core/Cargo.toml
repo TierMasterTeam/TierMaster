@@ -12,10 +12,12 @@ data = {path = "../data"}
 presentation = {path = "../presentation"}
 
 # Uncomment if needed
-# serde = {workspace = true}
-tokio = {workspace = true}
 # async-trait = {workspace = true}
+# bytes = {workspace = true}
 # derive-new = {workspace = true}
 # futures = {workspace = true}
+# image = {workspace = true}
+# serde = {workspace = true}
+tokio = {workspace = true}
 
 dotenv = "0.15.0"

@@ -14,5 +14,4 @@ impl Display for ApiError {
         write!(f, "{:?}", self)
     }
 }
-
 impl Error for ApiError {}
