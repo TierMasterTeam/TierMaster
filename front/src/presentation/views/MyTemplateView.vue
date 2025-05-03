@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import Footer from '../components/Footer.vue';
-import TemplateCreation from '../components/TemplateCreation.vue';
+import TierListTemplatesView from './TierListTemplatesView.vue';
 
 </script>
 
 <template>
-  <TemplateCreation/>
-  <Footer/>
+  <TierListTemplatesView />
 </template>

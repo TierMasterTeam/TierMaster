@@ -2,6 +2,7 @@
 import { CircleMinus, Image } from 'lucide-vue-next'
 import { ref } from 'vue'
 import BaseInput from './BaseInput.vue'
+import type { Card } from '@/domain/interfaces/TierList'
 
 const file = ref<File | null>(null)
 const imageName = ref('')
@@ -15,24 +16,24 @@ const onFileChange = (e: Event) => {
   }
 }
 
-const removeImage = () => {
+const removeCard = () => {
   file.value = null
   imageName.value = ''
   previewUrl.value = null
 }
 
 // Function to get image data
-const getImageData = () => {
+const getCardData = ():Card | null => {
   if (file.value && previewUrl.value && imageName.value) {
     return {
       name: imageName.value,
-      url: previewUrl.value,
+      image: previewUrl.value,
     }
   }
   return null
 }
 
-defineExpose({ file, imageName, previewUrl, getImageData, removeImage })
+defineExpose({ file, imageName, previewUrl, getCardData, removeCard })
 </script>
 
 <template>
@@ -46,7 +47,7 @@ defineExpose({ file, imageName, previewUrl, getImageData, removeImage })
         class="hidden"
       />
     </label>
-    <button v-if="file" @click="removeImage()" class="top-1 right-1 absolute z-10 bg-red-custom rounded-full cursor-pointer">
+    <button v-if="file" @click="removeCard()" class="top-1 right-1 absolute z-10 bg-red-custom rounded-full cursor-pointer">
         <CircleMinus />
     </button>
     <BaseInput

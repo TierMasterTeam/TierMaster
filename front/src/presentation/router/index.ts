@@ -16,11 +16,19 @@ const router = createRouter({
     },
     // Protected routes
     {
-      path: '/create-template',
+       path: '/tierlist-templates',
       component: NavBarLayout,
       meta: { requiresAuth: true },
       children: [
-        { path: '', name: 'createTemplate', component: () => import('../views/TemplateCreationView.vue') },
+        { path: '', name: 'tierlistTemplates', component: () => import('../views/TierListTemplatesView.vue') },
+      ],
+    },
+    {
+      path: '/my-templates',
+      component: NavBarLayout,
+      meta: { requiresAuth: true },
+      children: [
+        { path: '', name: 'myTemplates', component: () => import('../views/MyTemplateView.vue') },
       ],
     },
     {

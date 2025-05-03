@@ -2,6 +2,7 @@ export interface TierList {
   id?: string;
   name: string;
   author: string;
+  tags: string[];
   cards: Card[];
   grades: Grade[];
 
