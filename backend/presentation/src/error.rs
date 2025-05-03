@@ -1,7 +1,10 @@
+use derive_new::new;
+use axum::extract::multipart::MultipartError;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use domain::error::ApiError;
 
+#[derive(new)]
 pub struct ApiErrorResponse {
     pub code: StatusCode,
     pub message: String,
@@ -23,5 +26,14 @@ impl From<ApiError> for ApiErrorResponse {
         };
 
         Self { code, message }
+    }
+}
+
+impl From<MultipartError> for ApiErrorResponse {
+    fn from(value: MultipartError) -> Self {
+        Self {
+            code: value.status(),
+            message: value.body_text(),
+        }
     }
 }
