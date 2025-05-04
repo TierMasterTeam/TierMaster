@@ -1,5 +1,5 @@
+use data::databases::Databases;
 use dotenv::dotenv;
-use data::databases::Database;
 use presentation::server::Server;
 
 struct App;
@@ -11,7 +11,7 @@ impl App {
 
         println!("Starting server...");
         //2- Databases & AppState initialisation
-        let app_state = Database::connect()
+        let app_state = Databases::connect()
             .await.unwrap();
 
         //3- Server initialisation

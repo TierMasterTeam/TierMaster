@@ -6,6 +6,8 @@ This is the backend API for the TierMaster application, built with Rust.
 
 - [Rust](https://www.rust-lang.org/tools/install) (version 1.85.1 or newer)
 - [Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html) (comes with Rust)
+- [CMake](https://cmake.org/download/) (needed to build aws library)
+- [Clang](https://releases.llvm.org/download.html) (needed to build aws library)
 
 ## Getting Started
 
@@ -28,8 +30,37 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 Follow the installation instructions and restart your terminal.
 
-### Setting Up the Project
+### CMake and Clang
 
+The aws-lc-sys library requires CMake and a C/C++ compiler because it builds native code.
+- On Linux and macOS, your system's default compiler (such as clang or gcc) should work as long as CMake is available.
+- On Windows, you must use Clang, because MSVC does not support <stdatomic.h>. 
+While MinGW-w64 may work, it is currently untested.
+
+To verify CMake is installed:
+```bash
+cmake --version
+```
+
+Once Clang is installed on Windows, configure your environment like so:
+```bash
+# Tell Rust to use Clang
+set CC=clang
+set CXX=clang++
+
+# Tell CMake to use Clang
+set CMAKE_C_COMPILER=clang
+set CMAKE_CXX_COMPILER=clang++
+```
+
+You should be able to build the project !
+
+> **Note:** If you tried building the project before setting up CMake and Clang, make sure to clean your previous build with:
+> ```bash
+> cargo clean
+> ```
+
+### Setting Up the Project
 
 Set up environment variables:
 
