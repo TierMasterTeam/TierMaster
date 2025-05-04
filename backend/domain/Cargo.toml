@@ -10,5 +10,5 @@ bytes = {workspace = true}
 derive-new = {workspace = true}
 # futures = {workspace = true}
 image = {workspace = true}
-# serde = {workspace = true}
+serde = {workspace = true}
 # tokio = {workspace = true}

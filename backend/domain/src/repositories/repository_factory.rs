@@ -1,5 +1,4 @@
-use crate::repositories::user_repository::AbstractUserRepository;
-use crate::repositories::{AbstractAuthRepository, AbstractImageRepository, AbstractRedisRepository, AbstractTierlistRepository};
+use crate::repositories::{AbstractAuthRepository, AbstractImageRepository, AbstractRedisRepository, AbstractTierlistRepository, AbstractUserRepository};
 use std::sync::Arc;
 
 pub trait AbstractRepositoryFactory: Send + Sync {

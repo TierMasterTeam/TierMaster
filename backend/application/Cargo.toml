@@ -10,6 +10,7 @@ domain = { path = "../domain" }
 # async-trait = {workspace = true}
 bytes = {workspace = true}
 derive-new = {workspace = true}
+tracing = {workspace = true}
 chrono = "0.4.40"
 argon2 = { version = "0.5.3", features = ["std"] }
 base64 = "0.22.1"
