@@ -1,0 +1,15 @@
+meta {
+  name: Many Images
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{host}}/image
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  image: @file(C:\Users\adrie\Pictures\wallpaper\sylvain-sarrailh-wandering.jpg) @contentType(image/jpeg)
+}

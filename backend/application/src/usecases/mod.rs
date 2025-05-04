@@ -1,2 +1,3 @@
-mod upload_images_usecase;
-pub use upload_images_usecase::UploadImagesUsecase;
+mod resize_image_usecase;
+
+pub use resize_image_usecase::ResizeImageUsecase;
