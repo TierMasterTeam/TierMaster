@@ -1,8 +1,8 @@
-use serde::{Deserialize, Serialize};
-use domain::entities::{CreateTierlistEntity, TierlistEntity};
-use domain::mappers::{TryEntityMapper, EntityMapper};
-use mongodb::bson::oid::{ObjectId, Error};
 use crate::models::{CardModel, GradeModel};
+use domain::entities::{CreateTierlistEntity, TierlistEntity};
+use domain::mappers::{EntityMapper, TryEntityMapper};
+use mongodb::bson::oid::{Error, ObjectId};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TierlistModel {
@@ -10,6 +10,7 @@ pub struct TierlistModel {
     pub id: Option<ObjectId>,
     pub name: String,
     pub author: ObjectId,
+    pub tags: Vec<String>,
     pub cards: Vec<CardModel>,
     pub grades: Vec<GradeModel>,
 }
@@ -20,6 +21,7 @@ impl TryEntityMapper<TierlistEntity> for TierlistModel {
             id: self.id.unwrap_or_default().to_string(),
             name: self.name,
             author: self.author.to_string(),
+            tags: self.tags,
             cards: self.cards.into_iter().map(EntityMapper::to_entity).collect(),
             grades: self.grades.into_iter().map(EntityMapper::to_entity).collect(),
         }
@@ -36,6 +38,7 @@ impl TryFrom<TierlistEntity> for TierlistModel {
             id: Some(id),
             name: value.name,
             author: ObjectId::parse_str(value.author)?,
+            tags: value.tags,
             cards: value.cards.into_iter().map(Into::into).collect(),
             grades: value.grades.into_iter().map(Into::into).collect(),
         })
@@ -50,6 +53,7 @@ impl TryFrom<CreateTierlistEntity> for TierlistModel {
             id: None,
             name: value.name,
             author: ObjectId::parse_str(value.author)?,
+            tags: value.tags,
             cards: value.cards.into_iter().map(Into::into).collect(),
             grades: value.grades.into_iter().map(Into::into).collect(),
         })
