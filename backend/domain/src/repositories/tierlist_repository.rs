@@ -13,4 +13,5 @@ pub trait AbstractTierlistRepository: Send + Sync {
     async fn create_tierlist(&self, tierlist: CreateTierlistEntity) -> Result<(), ApiError>;
 
     async fn update_tierlist_by_id(&self, id: &str, tierlist: UpdateTierlistEntity) -> Result<(), ApiError>;
+    async fn search(&self, search_title: &str, search_tags: Vec<&str>) -> Result<Vec<TierlistEntity>, ApiError>;
 }

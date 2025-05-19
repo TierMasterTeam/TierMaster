@@ -1,0 +1,15 @@
+meta {
+  name: Search
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{host}}/tierlist/search?query=Program%23Language
+  body: none
+  auth: inherit
+}
+
+params:query {
+  query: Program%23Language
+}

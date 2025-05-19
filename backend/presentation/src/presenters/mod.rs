@@ -5,6 +5,7 @@ mod grade_presenter;
 mod update_tierlist_presenter;
 mod credentials_presenter;
 mod user_presenter;
+mod search_query_presenter;
 
 pub use create_tierlist_presenter::CreateTierlistPresenter;
 pub use tierlist_presenter::TierlistPresenter;
@@ -16,3 +17,5 @@ pub use grade_presenter::GradePresenter;
 pub use user_presenter::UserPresenter;
 
 pub use credentials_presenter::CredentialsPresenter;
+
+pub use search_query_presenter::SearchQueryPresenter;

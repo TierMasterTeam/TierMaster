@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UpdateTierlistPresenter {
     pub name: String,
+    pub tags: Vec<String>,
     pub cards: Vec<CardPresenter>,
     pub grades: Vec<GradePresenter>
 }
@@ -17,6 +18,7 @@ impl EntityMapper<UpdateTierlistEntity> for UpdateTierlistPresenter {
     fn to_entity(self) -> UpdateTierlistEntity {
         UpdateTierlistEntity {
             name: self.name,
+            tags: self.tags,
             cards: self.cards.into_iter().map(EntityMapper::to_entity).collect(),
             grades: self.grades.into_iter().map(EntityMapper::to_entity).collect(),
         }
@@ -27,6 +29,7 @@ impl From<UpdateTierlistEntity> for UpdateTierlistPresenter {
     fn from(value: UpdateTierlistEntity) -> Self {
         Self{
             name: value.name,
+            tags: value.tags,
             cards: value.cards.into_iter().map(Into::into).collect(),
             grades: value.grades.into_iter().map(Into::into).collect(),
         }

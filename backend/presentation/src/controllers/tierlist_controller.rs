@@ -1,8 +1,8 @@
 use crate::error::ApiErrorResponse;
-use crate::presenters::{CreateTierlistPresenter, TierlistPresenter, UpdateTierlistPresenter};
+use crate::presenters::{CreateTierlistPresenter, SearchQueryPresenter, TierlistPresenter, UpdateTierlistPresenter};
 use crate::states::AuthSession;
 use application::AppState;
-use axum::extract::{Path, State};
+use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
 use axum::routing::{get, post, put};
 use axum::{Json, Router};
@@ -18,7 +18,8 @@ impl TierlistController {
             .route("/", get(get_all_tierlists))
             .route("/{id}", get(get_tierlist_by_id))
             .route("/{id}", put(update_tierlist_by_id))
-            .route("/user/{id}", get(get_tierlists_of_user));
+            .route("/user/{id}", get(get_tierlists_of_user))
+            .route("/search", get(search_tierlist));
 
         Router::new()
             .nest("/tierlist", router)
@@ -88,6 +89,19 @@ async fn get_tierlists_of_user(
     let result = state.services()
         .tierlist()
         .get_tierlists_of_user(id.as_str())
+        .await?;
+
+    Ok(Json(result.into_iter().map(TierlistPresenter::from).collect()))
+}
+
+async fn search_tierlist(
+    Query(params): Query<SearchQueryPresenter>,
+    State(state): State<Arc<AppState>>,
+) -> Result<Json<Vec<TierlistPresenter>>, ApiErrorResponse> {
+
+    let result = state.services()
+        .tierlist()
+        .search(params.query.as_str())
         .await?;
 
     Ok(Json(result.into_iter().map(TierlistPresenter::from).collect()))
