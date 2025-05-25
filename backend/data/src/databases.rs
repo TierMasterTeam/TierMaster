@@ -9,6 +9,7 @@ use mongodb::options::{AuthMechanism, ClientOptions, Credential, ServerApi, Serv
 use mongodb::{Client, Database};
 use std::env;
 use std::sync::Arc;
+use url::Url;
 
 pub struct Databases {
     mongo: MongoDB,
@@ -36,8 +37,8 @@ impl Databases {
     pub fn mongo(&self) -> &Database {
         self.mongo.db()
     }
-    pub fn aws(&self) -> &S3Client {
-        &self.aws_bucket.client()
+    pub fn aws(&self) -> &AwsBucket {
+        &self.aws_bucket
     }
 
     pub fn redis(&self) -> &redis::Client {
@@ -46,7 +47,7 @@ impl Databases {
 }
 
 
-pub struct MongoDB(mongodb::Database);
+pub struct MongoDB(Database);
 
 impl MongoDB {
     pub async fn connect() -> Result<Self, DatabaseError> {
@@ -82,7 +83,7 @@ impl MongoDB {
         Ok(Self(database))
     }
 
-    pub fn db(&self) -> &mongodb::Database {
+    pub fn db(&self) -> &Database {
         &self.0
     }
 }
@@ -107,22 +108,27 @@ impl RedisDb {
 }
 
 
-pub struct AwsBucket(S3Client);
+pub struct AwsBucket {
+    client: S3Client,
+    public_url: Url,
+}
 impl AwsBucket {
     pub async fn connect() -> Result<Self, DatabaseError> {
         let access_key_id = get_env_var("S3_ACCESS_KEY_ID")?;
         let secret_access_key = get_env_var("S3_SECRET_ACCESS_KEY")?;
-        let token_value = get_env_var("S3_TOKEN_VALUE")?;
         let endpoint = get_env_var("S3_ENDPOINT")?;
+        let url = get_env_var("S3_PUBLIC_URL")?;
+        let public_url = Url::parse(&url)
+            .map_err(|_| DatabaseError::from(ApiError::InternalError(format!("Invalid URL: {url}"))))?;
 
         let credentials = Credentials::builder()
             .provider_name("r2")
-            .session_token(token_value)
             .access_key_id(access_key_id)
             .secret_access_key(secret_access_key)
             .build();
 
         let config = aws_config::defaults(BehaviorVersion::v2025_01_17())
+            .region("auto")
             .credentials_provider(credentials)
             .endpoint_url(endpoint)
             .load()
@@ -131,10 +137,13 @@ impl AwsBucket {
         let client = S3Client::new(&config);
 
         println!("Successfully connected to AWS S3");
-        Ok(Self(client))
+        Ok(Self{client, public_url})
     }
     pub fn client(&self) -> &S3Client {
-        &self.0
+        &self.client
+    }
+    pub fn pub_url(&self) -> &Url {
+        &self.public_url
     }
 }
 

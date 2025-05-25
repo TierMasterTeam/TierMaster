@@ -19,5 +19,6 @@ presentation = {path = "../presentation"}
 # image = {workspace = true}
 # serde = {workspace = true}
 tokio = {workspace = true}
+# webp = { workspace = true }
 
 dotenv = "0.15.0"

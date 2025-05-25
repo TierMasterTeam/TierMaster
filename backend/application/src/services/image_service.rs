@@ -1,17 +1,19 @@
-use crate::usecases::ResizeImageUsecase;
+use std::io::Cursor;
+use webp::Encoder;
 use argon2::password_hash::rand_core::{OsRng, RngCore};
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine;
 use derive_new::new;
-use domain::entities::ImageEntity;
 use domain::error::ApiError;
 use domain::repositories::AbstractImageRepository;
 use std::sync::Arc;
-use std::{env, fs};
+use bytes::Bytes;
+use domain::helpers::ImageHelper;
+use futures::stream::{FuturesUnordered, StreamExt};
+use image::ImageReader;
 
-const TEMP_IMAGE_FOLDER: &str = "resized_image";
 
-const TIERLIST_IMAGE_S3_FOLDER: &str = "tierlist_images"; 
+const TIERLIST_IMAGE_FOLDER: &str = "tierlist_images";
 
 #[derive(new)]
 pub struct ImageService {
@@ -19,49 +21,32 @@ pub struct ImageService {
 }
 
 impl ImageService {
-
-    pub async fn upload_image(&self, image: ImageEntity) -> Result<String, ApiError> {
-        let temp_dest_path = generate_temp_path(TEMP_IMAGE_FOLDER)?;
-        let random_file_name = generate_random_key();
-        let filename = format!("{random_file_name}.wepb");
-        let temp_file_path = format!("{temp_dest_path}/{filename}");
-
-        let resize_image_use_case = ResizeImageUsecase::new(&image.data, temp_file_path.as_str());
-        resize_image_use_case.execute().await?;
-        
-        let key = format!("{TIERLIST_IMAGE_S3_FOLDER}/{filename}");
-        let url_result = self.repo.upload_image(temp_file_path.as_str(), key.as_str()).await;
-
-        if let Err(e) = fs::remove_file(&temp_file_path) {
-            tracing::warn!("Failed to delete temp file {}: {:?}", temp_file_path, e);
-        }
-
-        url_result
+    async fn upload_image(&self, image: Bytes) -> Result<String, ApiError> {
+        let image_id = generate_random_key();
+        let cleaned_img = clean_image(image)?;
+        let key = format!("{TIERLIST_IMAGE_FOLDER}/{image_id}.webp");
+        self.repo.upload_image(cleaned_img, key.as_str()).await
     }
     
-    pub async fn updload_many_images(&self, images: Vec<ImageEntity>) -> Result<Vec<String>, ApiError> {
+    pub async fn upload_images(&self, images: Vec<Bytes>) -> Result<Vec<String>, ApiError> {
         let mut urls = Vec::new();
         let mut errors = Vec::new();
-        
-        for image in images.clone() {
-            let result = self.upload_image(image).await;
-            
-            if result.is_ok() {
-               urls.push(result.unwrap()) 
-            } else {
-                errors.push(result.err().unwrap());
-            }
+        let mut futures = FuturesUnordered::new();
+
+        for image in images {
+            let future = self.upload_image(image);
+            futures.push(future);
         }
 
-        if errors.len() == images.len() {
-            let mut error_message = String::new();
-
-            for error in errors {
-                error_message.push_str("\n\t");
-                error_message.push_str(error.to_string().as_str());
+        while let Some(result) = futures.next().await {
+            match result {
+                Ok(url) => { urls.push(url); },
+                Err(e) => { errors.push(e); },
             }
-
-            return Err(ApiError::InternalError(format!("Errors uploading files : {error_message}")));
+        }
+        
+        if urls.is_empty() && !errors.is_empty() {
+            return Err(errors.first().unwrap().clone());
         }
         
         Ok(urls)
@@ -77,14 +62,18 @@ fn generate_random_key() -> String {
     URL_SAFE_NO_PAD.encode(&token)
 }
 
-fn generate_temp_path(subfolder: &str) -> Result<String, ApiError> {
-    let mut path = env::temp_dir(); // e.g. /tmp on Linux
-    path.push(subfolder);
+fn clean_image(bytes: Bytes) -> Result<Bytes, ApiError> {
+    let image = ImageReader::new(Cursor::new(bytes))
+        .with_guessed_format()
+        .map_err(|e| ApiError::BadRequest(format!("Invalid Image : {e}")))?
+        .decode()
+        .map_err(|e| ApiError::BadRequest(format!("Invalid Image : {e}")))?
+        .resize_to_fit(480)
+        .crop_to_square();
 
-    let path_string = path.to_string_lossy().into_owned();
+    let webp = Encoder::from_image(&image)
+        .map_err(|e| ApiError::BadRequest(format!("Image encoding failed : {e}")))?
+        .encode(75f32);
 
-    std::fs::create_dir_all(&path)
-        .map_err(|e| ApiError::InternalError(format!("Failed to create temp dir {path_string} : {e}")))?;
-
-    Ok(path_string)
+    Ok(Bytes::copy_from_slice(&webp))
 }

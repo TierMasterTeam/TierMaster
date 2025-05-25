@@ -27,9 +27,9 @@ impl ImageHelper for DynamicImage {
         
         if width > size || height > size {
             return if width < height {
-                self.resize(size, u32::MAX, FilterType::Lanczos3)
+                self.resize(size, u32::MAX, FilterType::Triangle)
             } else {
-                self.resize(u32::MAX, size, FilterType::Lanczos3)
+                self.resize(u32::MAX, size, FilterType::Triangle)
             }
         }
        self.to_owned()

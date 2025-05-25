@@ -21,3 +21,4 @@ image = "0.25.6"
 tracing = "0.1.41"
 serde = { version = "1.0.219", features = ["derive"] }
 tokio = { version = "1.44.2", features = ["rt", "rt-multi-thread", "macros"] }
+webp = "0.3.0"

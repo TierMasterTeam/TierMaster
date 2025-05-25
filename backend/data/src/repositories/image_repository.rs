@@ -3,8 +3,10 @@ use aws_sdk_s3::primitives::ByteStream;
 use aws_sdk_s3::Client as S3Client;
 use domain::error::ApiError;
 use domain::repositories::AbstractImageRepository;
-use std::path::Path;
 use std::sync::Arc;
+use bytes::Bytes;
+use url::Url;
+use crate::databases::AwsBucket;
 
 const BUCKET_NAME: &str = "tier-master";
 
@@ -12,35 +14,36 @@ const BUCKET_NAME: &str = "tier-master";
 #[derive(Clone)]
 pub struct ImageRepository {
     s3_client: Arc<S3Client>,
+    pub_url: Url,
 }
 
 impl ImageRepository {
-    pub fn new(s3_client: &S3Client) -> Self {
+    pub fn new(bucket: &AwsBucket) -> Self {
         Self {
-            s3_client: Arc::new(s3_client.clone()),
+            s3_client: Arc::new(bucket.client().clone()),
+            pub_url: bucket.pub_url().clone(),
         }
     }
 }
 
 #[async_trait]
 impl AbstractImageRepository for ImageRepository {
-    async fn upload_image(&self, file_path: &str, key: &str) -> Result<String, ApiError> {
-        let body = ByteStream::from_path(Path::new(file_path)).await
-            .map_err(|e| ApiError::InternalError(format!("Failed to load image from path {file_path} : {e}")))?;
-
+    async fn upload_image(&self, image: Bytes, key: &str) -> Result<String, ApiError> {
+        let body = ByteStream::from(image);
+        
         self.s3_client
             .put_object()
             .bucket(BUCKET_NAME)
             .key(key)
             .body(body)
+            .content_type("image/webp")
             .send()
             .await
             .map_err(|e| ApiError::InternalError(format!("Failed to upload image : {e}")))?;
         
-        Ok(make_public_url(key))
+        let url = self.pub_url.join(key)
+            .map_err(|e| ApiError::InternalError(format!("Invalid image url : {e}")))?;
+        
+        Ok(url.to_string())
     }
-}
-
-fn make_public_url(key: &str) -> String {
-    format!("https://pub-b52a5664afb843f3914c1598888d508e.r2.dev/{key}")
 }
