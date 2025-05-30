@@ -8,6 +8,7 @@ use axum::routing::{get, post, put};
 use axum::{Json, Router};
 use domain::mappers::EntityMapper;
 use std::sync::Arc;
+use axum::response::IntoResponse;
 
 pub struct TierlistController;
 
@@ -30,15 +31,15 @@ async fn create_tierlist (
     _auth: AuthSession,
     State(state): State<Arc<AppState>>,
     Json(tierlist): Json<CreateTierlistPresenter>,
-) -> Result<StatusCode, ApiErrorResponse> {
+) -> Result<impl IntoResponse, ApiErrorResponse> {
     let tierlist = tierlist.to_entity();
 
-    state.services()
+    let result = state.services()
         .tierlist()
         .create_tierlist(tierlist)
         .await?;
 
-    Ok(StatusCode::CREATED)
+    Ok((StatusCode::CREATED, result))
 }
 
 async fn update_tierlist_by_id(

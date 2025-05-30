@@ -56,15 +56,18 @@ impl AbstractTierlistRepository for TierlistRepository {
         Ok(result)
     }
 
-    async fn create_tierlist(&self, tierlist: CreateTierlistEntity) -> Result<(), ApiError> {
+    async fn create_tierlist(&self, tierlist: CreateTierlistEntity) -> Result<String, ApiError> {
         let tierlist = TierlistModel::try_from(tierlist)
             .map_err(|err| ApiError::BadRequest(err.to_string()))?;
 
-        self.collection.insert_one(tierlist)
+        let result = self.collection.insert_one(tierlist)
             .await
             .map_err(|err| ApiError::InternalError(format!("Failed to execute query: {err}")))?;
-
-        Ok(())
+        
+        let result = result.inserted_id.as_str()
+            .ok_or(ApiError::InternalError("Failed to retrieve tierlist id".to_owned()))?;
+        
+        Ok(String::from(result))
     }
 
     async fn update_tierlist_by_id(&self, id: &str, tierlist: UpdateTierlistEntity) -> Result<(), ApiError> {

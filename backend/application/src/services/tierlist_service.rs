@@ -23,7 +23,7 @@ impl TierlistService {
         self.repo.get_tierlist_of_user(user_id).await
     }
 
-    pub async fn create_tierlist(&self, tierlist: CreateTierlistEntity) -> Result<(), ApiError> {
+    pub async fn create_tierlist(&self, tierlist: CreateTierlistEntity) -> Result<String, ApiError> {
         self.repo.create_tierlist(tierlist).await
     }
 
