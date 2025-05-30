@@ -14,6 +14,7 @@ use image::ImageReader;
 
 
 const TIERLIST_IMAGE_FOLDER: &str = "tierlist_images";
+const IMAGE_QUALITY: f32 = 75f32;
 
 #[derive(new)]
 pub struct ImageService {
@@ -63,6 +64,7 @@ fn generate_random_key() -> String {
 }
 
 fn clean_image(bytes: Bytes) -> Result<Bytes, ApiError> {
+    
     let image = ImageReader::new(Cursor::new(bytes))
         .with_guessed_format()
         .map_err(|e| ApiError::BadRequest(format!("Invalid Image : {e}")))?
@@ -73,7 +75,7 @@ fn clean_image(bytes: Bytes) -> Result<Bytes, ApiError> {
 
     let webp = Encoder::from_image(&image)
         .map_err(|e| ApiError::BadRequest(format!("Image encoding failed : {e}")))?
-        .encode(75f32);
+        .encode(IMAGE_QUALITY);
 
     Ok(Bytes::copy_from_slice(&webp))
 }
