@@ -20,4 +20,4 @@ tokio = {workspace = true}
 
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 axum = { version = "0.8.3", features = ["multipart"]}
-axum-extra = { version = "0.10.1", features = ["typed-header"] }
+axum-extra = { version = "0.10.1", features = ["typed-header", "erased-json"] }

@@ -9,6 +9,7 @@ use axum::{Json, Router};
 use domain::mappers::EntityMapper;
 use std::sync::Arc;
 use axum::response::IntoResponse;
+use axum_extra::json;
 
 pub struct TierlistController;
 
@@ -39,7 +40,7 @@ async fn create_tierlist (
         .create_tierlist(tierlist)
         .await?;
 
-    Ok((StatusCode::CREATED, result))
+    Ok((StatusCode::CREATED, json!({"id": result})))
 }
 
 async fn update_tierlist_by_id(
