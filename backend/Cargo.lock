@@ -677,9 +677,11 @@ dependencies = [
  "pin-project-lite",
  "rustversion",
  "serde",
+ "serde_json",
  "tower",
  "tower-layer",
  "tower-service",
+ "typed-json",
 ]
 
 [[package]]
@@ -4110,6 +4112,16 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
+]
+
+[[package]]
+name = "typed-json"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6024a8d0025400b3f6b189366e9aa92012cf9c4fe1cd2620848dd61425c49eed"
+dependencies = [
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

@@ -64,10 +64,11 @@ impl AbstractTierlistRepository for TierlistRepository {
             .await
             .map_err(|err| ApiError::InternalError(format!("Failed to execute query: {err}")))?;
         
-        let result = result.inserted_id.as_str()
-            .ok_or(ApiError::InternalError("Failed to retrieve tierlist id".to_owned()))?;
-        
-        Ok(String::from(result))
+        let id = result.inserted_id.as_object_id()
+            .ok_or(ApiError::InternalError("Failed to retrieve tierlist id".to_owned()))?
+            .to_string();
+
+        Ok(id)
     }
 
     async fn update_tierlist_by_id(&self, id: &str, tierlist: UpdateTierlistEntity) -> Result<(), ApiError> {
