@@ -1,28 +1,53 @@
 use crate::error::DatabaseError;
 use crate::repositories::RepositoryFactory;
 use application::AppState;
+use aws_config::BehaviorVersion;
+use aws_sdk_s3::config::Credentials;
+use aws_sdk_s3::Client as S3Client;
 use domain::error::ApiError;
 use mongodb::options::{AuthMechanism, ClientOptions, Credential, ServerApi, ServerApiVersion};
-use mongodb::Client;
+use mongodb::{Client, Database};
 use std::env;
+use std::sync::Arc;
+use url::Url;
 
-pub struct Database;
+pub struct Databases {
+    mongo: MongoDB,
+    aws_bucket: AwsBucket,
+    redis: RedisDb,
+}
 
-impl Database {
+impl Databases {
     pub async fn connect() -> Result<AppState, DatabaseError> {
-        let db = MongoDB::connect()
-            .await?;
+        let mongo = MongoDB::connect().await?;
+        let aws_bucket = AwsBucket::connect().await?;
+        let redis = RedisDb::connect().await?;
 
-        let redis_db = RedisDb::connect().await?;
+        let databases = Databases {
+            mongo,
+            aws_bucket,
+            redis
+        };
 
-        let factory = RepositoryFactory::init(&db.db(), redis_db);
+        let factory = RepositoryFactory::init(&databases);
 
-        Ok(AppState::new(Box::new(factory)))
+        Ok(AppState::new(Arc::new(factory)))
+    }
+
+    pub fn mongo(&self) -> &Database {
+        self.mongo.db()
+    }
+    pub fn aws(&self) -> &AwsBucket {
+        &self.aws_bucket
+    }
+
+    pub fn redis(&self) -> &redis::Client {
+        &self.redis.client()
     }
 }
 
 
-pub struct MongoDB(mongodb::Database);
+pub struct MongoDB(Database);
 
 impl MongoDB {
     pub async fn connect() -> Result<Self, DatabaseError> {
@@ -58,7 +83,7 @@ impl MongoDB {
         Ok(Self(database))
     }
 
-    pub fn db(&self) -> &mongodb::Database {
+    pub fn db(&self) -> &Database {
         &self.0
     }
 }
@@ -75,8 +100,56 @@ impl RedisDb {
             .map_err(|e| DatabaseError::from(
                 ApiError::InternalError(format!("Failed to connect to redis : {e}"))))?;
 
+        println!("Successfully connected to Redis");
         Ok(Self(client))
     }
 
     pub fn client(&self) -> &redis::Client {&self.0}
+}
+
+
+pub struct AwsBucket {
+    client: S3Client,
+    public_url: Url,
+}
+impl AwsBucket {
+    pub async fn connect() -> Result<Self, DatabaseError> {
+        let access_key_id = get_env_var("S3_ACCESS_KEY_ID")?;
+        let secret_access_key = get_env_var("S3_SECRET_ACCESS_KEY")?;
+        let endpoint = get_env_var("S3_ENDPOINT")?;
+        let url = get_env_var("S3_PUBLIC_URL")?;
+        let public_url = Url::parse(&url)
+            .map_err(|_| DatabaseError::from(ApiError::InternalError(format!("Invalid URL: {url}"))))?;
+
+        let credentials = Credentials::builder()
+            .provider_name("r2")
+            .access_key_id(access_key_id)
+            .secret_access_key(secret_access_key)
+            .build();
+
+        let config = aws_config::defaults(BehaviorVersion::v2025_01_17())
+            .region("auto")
+            .credentials_provider(credentials)
+            .endpoint_url(endpoint)
+            .load()
+            .await;
+
+        let client = S3Client::new(&config);
+
+        println!("Successfully connected to AWS S3");
+        Ok(Self{client, public_url})
+    }
+    pub fn client(&self) -> &S3Client {
+        &self.client
+    }
+    pub fn pub_url(&self) -> &Url {
+        &self.public_url
+    }
+}
+
+fn get_env_var(var_key: &str) -> Result<String, DatabaseError> {
+    let var = env::var(var_key)
+        .map_err(|_| DatabaseError::from(ApiError::InternalError(format!("Missing '{var_key}' environment variable"))))?;
+
+    Ok(var)
 }

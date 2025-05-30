@@ -7,11 +7,18 @@ edition.workspace = true
 domain = { path = "../domain" }
 application = { path = "../application" }
 
-serde = {workspace = true}
-# tokio = {workspace = true}
+# Uncomment if needed
 async-trait = {workspace = true}
+bytes = {workspace = true}
 # derive-new = {workspace = true}
 futures = {workspace = true}
+# image = {workspace = true}
+serde = {workspace = true}
+# tokio = {workspace = true}
+# webp = { workspace = true }
 
 mongodb = "3.2.3"
-redis = "0.30.0"
+redis = "0.31.0"
+aws-config = "1.6.2"
+aws-sdk-s3 = "1.83.0"
+url = "2.5.4"

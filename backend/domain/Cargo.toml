@@ -5,8 +5,11 @@ edition.workspace = true
 
 [dependencies]
 # Uncomment if needed
-# tokio = {workspace = true}
 async-trait = {workspace = true}
-serde = {workspace = true}
-# derive-new = {workspace = true}
+bytes = {workspace = true}
+derive-new = {workspace = true}
 # futures = {workspace = true}
+image = {workspace = true}
+serde = {workspace = true}
+# tokio = {workspace = true}
+# webp = { workspace = true }
