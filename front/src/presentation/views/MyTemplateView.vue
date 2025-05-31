@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import Footer from '../components/Footer.vue';
-import TierListTemplatesView from './TierListTemplatesView.vue';
+import EditTemplate from '../components/EditTemplate.vue';
 
 </script>
 
 <template>
-  <TierListTemplatesView />
+  <EditTemplate />
 </template>

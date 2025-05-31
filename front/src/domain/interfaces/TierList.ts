@@ -18,3 +18,9 @@ export interface Card {
   name: string;
   image: string;
 }
+
+export interface CardUpload {
+  name: string;
+  image: File;
+}
+
