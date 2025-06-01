@@ -5,6 +5,7 @@ use crate::entities::GradeEntity;
 pub struct TierlistEntity {
     pub id: String,
     pub name: String,
+    pub is_public: bool,
     pub author: String,
     pub tags: Vec<String>,
     pub cards: Vec<CardEntity>,

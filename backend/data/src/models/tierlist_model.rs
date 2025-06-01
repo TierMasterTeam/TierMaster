@@ -9,6 +9,7 @@ pub struct TierlistModel {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     pub id: Option<ObjectId>,
     pub name: String,
+    pub is_public: bool,
     pub author: ObjectId,
     pub tags: Vec<String>,
     pub cards: Vec<CardModel>,
@@ -19,6 +20,7 @@ impl TryEntityMapper<TierlistEntity> for TierlistModel {
     fn to_entity(self) -> TierlistEntity {
         TierlistEntity {
             id: self.id.unwrap_or_default().to_string(),
+            is_public: self.is_public,
             name: self.name,
             author: self.author.to_string(),
             tags: self.tags,
@@ -37,6 +39,7 @@ impl TryFrom<TierlistEntity> for TierlistModel {
         Ok(Self {
             id: Some(id),
             name: value.name,
+            is_public: value.is_public,
             author: ObjectId::parse_str(value.author)?,
             tags: value.tags,
             cards: value.cards.into_iter().map(Into::into).collect(),
@@ -52,6 +55,7 @@ impl TryFrom<CreateTierlistEntity> for TierlistModel {
         Ok(Self {
             id: None,
             name: value.name,
+            is_public: value.is_public,
             author: ObjectId::parse_str(value.author)?,
             tags: value.tags,
             cards: value.cards.into_iter().map(Into::into).collect(),

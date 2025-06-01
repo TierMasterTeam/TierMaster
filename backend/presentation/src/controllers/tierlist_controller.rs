@@ -4,12 +4,12 @@ use crate::states::AuthSession;
 use application::AppState;
 use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
+use axum::response::IntoResponse;
 use axum::routing::{get, post, put};
 use axum::{Json, Router};
+use axum_extra::json;
 use domain::mappers::EntityMapper;
 use std::sync::Arc;
-use axum::response::IntoResponse;
-use axum_extra::json;
 
 pub struct TierlistController;
 
@@ -44,12 +44,26 @@ async fn create_tierlist (
 }
 
 async fn update_tierlist_by_id(
-    _auth: AuthSession,
+    auth: AuthSession,
     State(state): State<Arc<AppState>>,
     Path(id): Path<String>,
     Json(tierlist): Json<UpdateTierlistPresenter>,
 ) -> Result<StatusCode, ApiErrorResponse> {
     let tierlist = tierlist.to_entity();
+
+    let original_tierlist = state.services()
+        .tierlist()
+        .get_tierlist_by_id(id.as_str())
+        .await?;
+
+    let is_not_author_of_tierlist = auth.user_id.ne(&original_tierlist.author);
+    let updating_is_public =  original_tierlist.is_public.ne(&tierlist.is_public);
+    if is_not_author_of_tierlist && updating_is_public {
+        return Err(ApiErrorResponse::new(
+            StatusCode::UNAUTHORIZED,
+            "Only the author has the right to change the visibility of a tierlist.".to_string()
+        ));
+    }
 
     state.services()
         .tierlist()
