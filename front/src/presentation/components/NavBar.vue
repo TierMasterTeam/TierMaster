@@ -29,10 +29,10 @@ const useLogout = () => {
         </li>
         <li>
           <router-link
-            :to="{name: 'createTemplate'}"
+            :to="{name: 'myTemplates'}"
             class="nav-link"
-            :class="{ 'nav-link-active': route.name === 'createTemplate' }"
-          >create template</router-link>
+            :class="{ 'nav-link-active': route.name === 'myTemplates' }"
+          >My templates</router-link>
         </li>
       </ul>
     </div>
