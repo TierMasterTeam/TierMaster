@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 pub struct TierlistPresenter {
     pub id: String,
     pub name: String,
+    pub is_public: bool,
     pub author: String,
     pub tags: Vec<String>,
     pub cards: Vec<CardPresenter>,
@@ -21,6 +22,7 @@ impl EntityMapper<TierlistEntity> for TierlistPresenter {
         TierlistEntity {
             id: self.id,
             name: self.name,
+            is_public: self.is_public,
             author: self.author,
             tags: self.tags,
             cards: self.cards.into_iter().map(EntityMapper::to_entity).collect(),
@@ -34,6 +36,7 @@ impl From<TierlistEntity> for TierlistPresenter {
         Self{
             id: value.id,
             name: value.name,
+            is_public: value.is_public,
             author: value.author,
             tags: value.tags,
             cards: value.cards.into_iter().map(Into::into).collect(),
