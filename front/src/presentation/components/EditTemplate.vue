@@ -11,6 +11,7 @@ import type { Card, TierList } from '@/domain/interfaces/TierList';
 import { useAuthStore } from '../stores/authStore';
 import { useRoute } from 'vue-router';
 import { useUtilsStore } from '../stores/utilsStore';
+import pp from '../../assets/pp.png'; // Placeholder image import
 
 const showToast = useUtilsStore().showToast;
 const tierListStore = useTierListStore();
@@ -22,6 +23,8 @@ const template = ref<TierList | undefined>(undefined);
 const currentCategory = ref<string>('');
 const imageUploadRef = ref();
 const showNameBubbles = ref<boolean[]>([]);
+
+const coverImgUrl = ref<string>(''); // Placeholder image URL
 
 onMounted(async () => {
   const id = route.params.id;
@@ -211,9 +214,12 @@ const SaveTemplate = async () => {
 
       <div class="flex flex-col items-center">
         <div>
-          <label for="coverImageInput">
+          <label for="coverImageInput" class="w-100 h-50 block mb-12">
             <h3 class="text-2xl font-jersey">TierList Cover</h3>
-            <img src="../../assets/pp.png" alt="Cover Image" class="w-64 h-64 object-cover rounded-md mb-4" />
+            <img v-if="coverImgUrl" :src="coverImgUrl" alt="Cover Image" class="w-full h-full object-cover rounded-md border-white-custom border-2" />
+            <div v-else class="w-full h-full flex items-center justify-center bg-light-gray-custom rounded-md mb-4 border-white-custom border-2 text-gray-500">
+              No cover image selected
+            </div>
           </label>
           <input type="file" accept="image/*" @change="onCoverFileChange" class="hidden" id="coverImageInput" />
         </div>
