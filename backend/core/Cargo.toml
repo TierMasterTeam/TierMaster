@@ -21,4 +21,4 @@ presentation = {path = "../presentation"}
 tokio = {workspace = true}
 # webp = { workspace = true }
 
-dotenv = "0.15.0"
+dotenvy = "0.15.7"
