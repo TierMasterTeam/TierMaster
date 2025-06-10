@@ -9,6 +9,21 @@ import { io } from 'socket.io-client'
 const tierListStore = useTierListStore()
 const isDragging = ref(false)
 
+
+const socket = io("ws://http://localhost:3000/api/ws/", {
+  reconnectionDelayMax: 10000,
+  auth: {
+    token: "123"
+  },
+  query: {
+    "my-key": "my-value"
+  }
+});
+
+socket.io.on("ping", () => {
+  console.log("Ping received from server");
+});
+
 onMounted(async () => {
   await tierListStore.getTierListById('6825d706c37c360531013170')
   const socket = io('http://localhost:3000/api/ws').connect()
