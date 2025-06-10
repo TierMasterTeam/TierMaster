@@ -10,6 +10,7 @@ use hmac::{Hmac, KeyInit, Mac};
 use sha2::Sha256;
 use std::sync::Arc;
 
+#[derive(Clone)]
 pub struct AuthService {
     repo: Arc<dyn AbstractAuthRepository>,
     redis_service: AuthRedisService
