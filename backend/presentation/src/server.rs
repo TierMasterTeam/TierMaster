@@ -5,9 +5,9 @@ use axum::routing::get;
 use axum::Router;
 use socketioxide::layer::SocketIoLayer;
 use socketioxide::SocketIo;
-use tower::ServiceBuilder;
 use std::env;
 use std::sync::Arc;
+use tower::ServiceBuilder;
 use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::prelude::__tracing_subscriber_SubscriberExt;
@@ -31,7 +31,7 @@ impl Server {
             .with_state(Arc::new(state.clone()))
             .layer(
                 ServiceBuilder::new()
-                .layer(CorsLayer::permissive())
+                .layer(create_cors())
                 .layer(websockets(state.clone()))
             ).layer(TraceLayer::new_for_http());
 
@@ -48,24 +48,13 @@ fn websockets(app_state: AppState) -> SocketIoLayer {
         .with_state(app_state)
         .build_layer();
 
-    io.ns("/ws/", WebsocketController::on_connect);
+    io.ns("/api/ws", WebsocketController::on_connect);
 
     websocket_layer
 }
 
 
 fn routes() -> Router<Arc<AppState>> {
-    let origins = [
-        "http://localhost:5173".parse().unwrap(),
-        "https://tiermaster.app".parse().unwrap(),
-    ];
-    //CORS config
-    let cors = CorsLayer::new()
-        .allow_origin(origins)
-        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE, Method::OPTIONS])
-        .allow_headers([header::AUTHORIZATION,header::CONTENT_TYPE, header::ACCEPT,header::ORIGIN,])
-        .allow_credentials(true);
-
     let api = Router::new()
         .route("/", get(|| async {
             let version = env!("CARGO_PKG_VERSION");
@@ -77,5 +66,18 @@ fn routes() -> Router<Arc<AppState>> {
 
     Router::new()
         .nest("/api", api)
-        .layer(cors)
+        .layer(create_cors())
+}
+
+fn create_cors() -> CorsLayer {
+    let origins = [
+        "http://localhost:5173".parse().unwrap(),
+        "https://tiermaster.app".parse().unwrap(),
+    ];
+
+    CorsLayer::new()
+        .allow_origin(origins)
+        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE, Method::OPTIONS])
+        .allow_headers([header::AUTHORIZATION,header::CONTENT_TYPE, header::ACCEPT,header::ORIGIN,])
+        .allow_credentials(true)
 }

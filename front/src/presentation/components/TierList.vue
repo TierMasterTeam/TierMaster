@@ -1,26 +1,36 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useTierListStore } from '../stores/tierListStore';
-import { VueDraggable } from 'vue-draggable-plus';
-import ItemCard from '../components/ItemCard.vue';
-import Button from './base/Button.vue';
-const tierListStore = useTierListStore();
-const isDragging = ref(false);
+import { onMounted, ref } from 'vue'
+import { useTierListStore } from '../stores/tierListStore'
+import { VueDraggable } from 'vue-draggable-plus'
+import ItemCard from '../components/ItemCard.vue'
+import Button from './base/Button.vue'
+import { io } from 'socket.io-client'
+
+const tierListStore = useTierListStore()
+const isDragging = ref(false)
 
 onMounted(async () => {
-  await tierListStore.getTierListById('680cde3fa71aefcf59820e88');
-});
+  await tierListStore.getTierListById('6825d706c37c360531013170')
+  const socket = io('http://localhost:3000/api/ws').connect()
 
+  socket.io.on('ping', () => {
+    console.log('Ping received from server')
+  })
+})
 </script>
 
 <template>
   <div class="container mx-auto p-4" v-if="tierListStore.currentTierlist">
-    <h1 v-if="tierListStore.currentTierlist.name" class="text-4xl font-bold text-[#31E7C3] pb-4 font-jersey">
+    <h1
+      v-if="tierListStore.currentTierlist.name"
+      class="text-4xl font-bold text-[#31E7C3] pb-4 font-jersey"
+    >
       {{ tierListStore.currentTierlist.name }} :
     </h1>
 
     <div class="grid gap-4">
-      <div v-for="grade in tierListStore.currentTierlist.grades"
+      <div
+        v-for="grade in tierListStore.currentTierlist.grades"
         :key="grade.name"
         class="p-3 rounded-3xl shadow-md flex gap-2 border-2"
       >
@@ -39,33 +49,40 @@ onMounted(async () => {
           @end="isDragging = false"
         >
           <div v-for="card in grade.cards" :key="card.name" class="w-19 h-19">
-            <ItemCard :card="card" :grade="grade" :is-dragging="isDragging"/>
+            <ItemCard :card="card" :grade="grade" :is-dragging="isDragging" />
           </div>
         </VueDraggable>
       </div>
       <VueDraggable
-          v-model="tierListStore.currentTierlist.cards"
-          item-key="name"
-          group="grades"
-          class="flex-1 flex flex-wrap gap-2 rounded-md items-center"
-          @start="isDragging = true"
-          @end="isDragging = false"
-        >
-          <div v-for="card in tierListStore.currentTierlist.cards" :key="card.name" class="w-19 h-19">
-            <ItemCard :card="card" :is-dragging="isDragging"/>
-          </div>
-        </VueDraggable>
+        v-model="tierListStore.currentTierlist.cards"
+        item-key="name"
+        group="grades"
+        class="flex-1 flex flex-wrap gap-2 rounded-md items-center"
+        @start="isDragging = true"
+        @end="isDragging = false"
+      >
+        <div v-for="card in tierListStore.currentTierlist.cards" :key="card.name" class="w-19 h-19">
+          <ItemCard :card="card" :is-dragging="isDragging" />
+        </div>
+      </VueDraggable>
     </div>
-    <Button type="button" variant="primary" size="md" class="mt-4" @click="tierListStore.saveTierList">
+    <Button
+      type="button"
+      variant="primary"
+      size="md"
+      class="mt-4"
+      @click="tierListStore.saveTierList"
+    >
       Save Tierlist
     </Button>
   </div>
-
 </template>
 
 <style scoped>
 .tier-container {
-  transition: box-shadow 0.3s ease, border 0.3s ease;
+  transition:
+    box-shadow 0.3s ease,
+    border 0.3s ease;
 }
 
 .tier-dropzone {
