@@ -5,6 +5,7 @@ use axum::routing::get;
 use axum::Router;
 use socketioxide::layer::SocketIoLayer;
 use socketioxide::SocketIo;
+use tower::ServiceBuilder;
 use std::env;
 use std::sync::Arc;
 use tower_http::cors::CorsLayer;
@@ -28,8 +29,11 @@ impl Server {
 
         let app = routes()
             .with_state(Arc::new(state.clone()))
-            .layer(websockets(state.clone()))
-            .layer(TraceLayer::new_for_http());
+            .layer(
+                ServiceBuilder::new()
+                .layer(CorsLayer::permissive())
+                .layer(websockets(state.clone()))
+            ).layer(TraceLayer::new_for_http());
 
         let listener = tokio::net::TcpListener::bind(format!("{ip}:{port}"))
             .await.unwrap();
