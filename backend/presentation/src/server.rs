@@ -1,8 +1,10 @@
-use crate::controllers::{AuthController, ImageController, TierlistController};
+use crate::controllers::{AuthController, ImageController, TierlistController, WebsocketController};
 use application::AppState;
 use axum::http::{header, Method};
 use axum::routing::get;
 use axum::Router;
+use socketioxide::layer::SocketIoLayer;
+use socketioxide::SocketIo;
 use std::env;
 use std::sync::Arc;
 use tower_http::cors::CorsLayer;
@@ -25,7 +27,8 @@ impl Server {
             .init();
 
         let app = routes()
-            .with_state(Arc::new(state))
+            .with_state(Arc::new(state.clone()))
+            .layer(websockets(state.clone()))
             .layer(TraceLayer::new_for_http());
 
         let listener = tokio::net::TcpListener::bind(format!("{ip}:{port}"))
@@ -34,6 +37,16 @@ impl Server {
         println!("Server successfully started on http://{ip}:{port}");
         axum::serve(listener, app).await.unwrap();
     }
+}
+
+fn websockets(app_state: AppState) -> SocketIoLayer {
+    let (websocket_layer, io) = SocketIo::builder()
+        .with_state(app_state)
+        .build_layer();
+
+    io.ns("/ws/", WebsocketController::on_connect);
+
+    websocket_layer
 }
 
 

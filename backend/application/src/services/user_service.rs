@@ -4,7 +4,7 @@ use domain::error::ApiError;
 use domain::repositories::AbstractUserRepository;
 use std::sync::Arc;
 
-#[derive(new)]
+#[derive(new, Clone)]
 pub struct UserService {
     repo: Arc<dyn AbstractUserRepository>,
 }

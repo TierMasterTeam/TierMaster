@@ -5,7 +5,7 @@ use domain::repositories::AbstractTierlistRepository;
 use std::collections::HashSet;
 use std::sync::Arc;
 
-#[derive(new)]
+#[derive(new, Clone)]
 pub struct TierlistService{
     repo: Arc<dyn AbstractTierlistRepository>,
 }

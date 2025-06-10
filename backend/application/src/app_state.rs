@@ -2,6 +2,7 @@ use crate::services::ServiceFactory;
 use domain::repositories::AbstractRepositoryFactory;
 use std::sync::Arc;
 
+#[derive(Clone)]
 pub struct AppState {
     pub services: ServiceFactory,
 }

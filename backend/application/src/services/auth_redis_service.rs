@@ -8,7 +8,7 @@ const TOKEN_EXPIRATION: u64 = 3600; // 1 hour
 const REFRESH_TOKEN_EXPIRATION: u64 = 604800; // 1 week
 const MAX_USER_SESSION_DURATION: u64 = 86400 * 30 * 3; // ~ 3 months
 
-#[derive(new)]
+#[derive(new, Clone)]
 pub struct AuthRedisService { 
     redis: Arc<dyn AbstractRedisRepository>
 }

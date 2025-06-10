@@ -1,22 +1,22 @@
-use std::io::Cursor;
-use webp::Encoder;
 use argon2::password_hash::rand_core::{OsRng, RngCore};
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine;
+use bytes::Bytes;
 use derive_new::new;
 use domain::error::ApiError;
-use domain::repositories::AbstractImageRepository;
-use std::sync::Arc;
-use bytes::Bytes;
 use domain::helpers::ImageHelper;
+use domain::repositories::AbstractImageRepository;
 use futures::stream::{FuturesUnordered, StreamExt};
 use image::ImageReader;
+use std::io::Cursor;
+use std::sync::Arc;
+use webp::Encoder;
 
 
 const TIERLIST_IMAGE_FOLDER: &str = "tierlist_images";
 const IMAGE_QUALITY: f32 = 75f32;
 
-#[derive(new)]
+#[derive(new, Clone)]
 pub struct ImageService {
     repo: Arc<dyn AbstractImageRepository>
 }
