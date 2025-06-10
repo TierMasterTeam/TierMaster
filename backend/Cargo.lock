@@ -2987,6 +2987,7 @@ dependencies = [
  "serde",
  "socketioxide",
  "tokio",
+ "tower",
  "tower-http",
  "tracing-subscriber",
 ]

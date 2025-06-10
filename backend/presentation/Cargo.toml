@@ -23,3 +23,4 @@ axum = { version = "0.8.3", features = ["multipart"]}
 axum-extra = { version = "0.10.1", features = ["typed-header", "erased-json"] }
 socketioxide = {version = "0.17.2", features = ["state"] }
 log = "0.4.27"
+tower = "0.5.2"
