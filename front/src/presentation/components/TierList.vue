@@ -4,11 +4,27 @@ import { useTierListStore } from '../stores/tierListStore';
 import { VueDraggable } from 'vue-draggable-plus';
 import ItemCard from '../components/ItemCard.vue';
 import Button from './base/Button.vue';
+import { io } from "socket.io-client";
 const tierListStore = useTierListStore();
 const isDragging = ref(false);
 
+
+const socket = io("ws://http://localhost:3000/api/ws/", {
+  reconnectionDelayMax: 10000,
+  auth: {
+    token: "123"
+  },
+  query: {
+    "my-key": "my-value"
+  }
+});
+
+socket.io.on("ping", () => {
+  console.log("Ping received from server");
+});
+
 onMounted(async () => {
-  await tierListStore.getTierListById('680cde3fa71aefcf59820e88');
+  await tierListStore.getTierListById('6825d706c37c360531013170');
 });
 
 </script>
