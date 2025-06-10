@@ -1,5 +1,5 @@
 use data::databases::Databases;
-use dotenv::dotenv;
+use dotenvy::dotenv;
 use presentation::server::Server;
 
 struct App;
