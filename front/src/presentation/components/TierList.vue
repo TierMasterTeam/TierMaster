@@ -1,36 +1,44 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, type Ref } from 'vue'
 import { useTierListStore } from '../stores/tierListStore'
 import { VueDraggable } from 'vue-draggable-plus'
 import ItemCard from '../components/ItemCard.vue'
 import Button from './base/Button.vue'
 import { io } from 'socket.io-client'
+import type { TierList } from '@/domain/interfaces/TierList'
 
 const tierListStore = useTierListStore()
 const isDragging = ref(false)
+const tierList:Ref<TierList | null> = ref(null)
 
 onMounted(async () => {
-  await tierListStore.getTierListById('6825d706c37c360531013170')
+  tierList.value =  await tierListStore.getTierListById('6825d706c37c360531013170')
   const socket = io('http://localhost:3000/api/ws').connect()
 
   socket.io.on('ping', () => {
     console.log('Ping received from server')
   })
+
+  socket.on('tierlist', (tierlist: TierList) => {
+    console.log('Received tierlist update:', tierlist)
+    tierList.value = tierlist    
+  })
+
 })
 </script>
 
 <template>
-  <div class="container mx-auto p-4" v-if="tierListStore.currentTierlist">
+  <div class="container mx-auto p-4" v-if="tierList">
     <h1
-      v-if="tierListStore.currentTierlist.name"
+      v-if="tierList.name"
       class="text-4xl font-bold text-[#31E7C3] pb-4 font-jersey"
     >
-      {{ tierListStore.currentTierlist.name }} :
+      {{ tierList.name }} :
     </h1>
 
     <div class="grid gap-4">
       <div
-        v-for="grade in tierListStore.currentTierlist.grades"
+        v-for="grade in tierList.grades"
         :key="grade.name"
         class="p-3 rounded-3xl shadow-md flex gap-2 border-2"
       >
@@ -54,14 +62,14 @@ onMounted(async () => {
         </VueDraggable>
       </div>
       <VueDraggable
-        v-model="tierListStore.currentTierlist.cards"
+        v-model="tierList.cards"
         item-key="name"
         group="grades"
         class="flex-1 flex flex-wrap gap-2 rounded-md items-center"
         @start="isDragging = true"
         @end="isDragging = false"
       >
-        <div v-for="card in tierListStore.currentTierlist.cards" :key="card.name" class="w-19 h-19">
+        <div v-for="card in tierList.cards" :key="card.name" class="w-19 h-19">
           <ItemCard :card="card" :is-dragging="isDragging" />
         </div>
       </VueDraggable>
