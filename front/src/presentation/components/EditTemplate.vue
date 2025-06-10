@@ -11,6 +11,7 @@ import type { Card, TierList } from '@/domain/interfaces/TierList';
 import { useAuthStore } from '../stores/authStore';
 import { useRoute } from 'vue-router';
 import { useUtilsStore } from '../stores/utilsStore';
+import pp from '../../assets/pp.png'; // Placeholder image import
 
 const showToast = useUtilsStore().showToast;
 const tierListStore = useTierListStore();
@@ -23,6 +24,8 @@ const currentCategory = ref<string>('');
 const imageUploadRef = ref();
 const showNameBubbles = ref<boolean[]>([]);
 
+const coverImgUrl = ref<string>(''); // Placeholder image URL
+
 onMounted(async () => {
   const id = route.params.id;
   if (id) {
@@ -33,6 +36,25 @@ onMounted(async () => {
     }
   }
 });
+
+const onCoverFileChange = async (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target.files && target.files[0]) {
+    const file = target.files[0];
+    try {
+      const formData = new FormData();
+      formData.append('coverImage', file);
+      const res = await tierListStore.uploadImages(formData);
+      if (res) {
+        // template.value!.coverImage = res; // backend retourne une URL
+        showToast('Cover image updated successfully', 'success');
+      }
+    } catch (error) {
+      showToast('Error uploading cover image', 'error');
+      console.error('Error uploading cover image:', error);
+    }
+  }
+};
 
 const addCategory = () => {
   if (currentCategory.value.trim() !== '') {
@@ -132,7 +154,7 @@ const SaveTemplate = async () => {
           <Button variant="secondary" type="submit" size="md" icon="plus" class="mb-4 h-11" />
         </form>
 
-        <ul class="flex flex-wrap pb-4 max-w-xl gap-4">
+        <ul class="flex flex-wrap pb-4 max-w-xl gap-4 mb-4">
           <li v-for="(category, index) in template.tags" :key="index" class="relative">
             <span class="bg-gray-custom rounded-full px-4 py-2 font-normal text-base font-roboto">
               {{ category }}
@@ -146,7 +168,7 @@ const SaveTemplate = async () => {
           </li>
         </ul>
 
-        <div class="sm:flex-col flex md:flex-row gap-16">
+        <div class="flex-col-reverse flex lg:flex-row gap-16">
           <div>
             <ImagePreviewInput ref="imageUploadRef" />
             <Button
@@ -190,7 +212,18 @@ const SaveTemplate = async () => {
         </div>
       </div>
 
-      <div>
+      <div class="flex flex-col items-center">
+        <div>
+          <label for="coverImageInput" class="w-100 h-50 block mb-12">
+            <h3 class="text-2xl font-jersey">TierList Cover</h3>
+            <img v-if="coverImgUrl" :src="coverImgUrl" alt="Cover Image" class="w-full h-full object-cover rounded-md border-white-custom border-2" />
+            <div v-else class="w-full h-full flex items-center justify-center bg-light-gray-custom rounded-md mb-4 border-white-custom border-2 text-gray-500">
+              No cover image selected
+            </div>
+          </label>
+          <input type="file" accept="image/*" @change="onCoverFileChange" class="hidden" id="coverImageInput" />
+        </div>
+
         <div class="flex gap-4 items-center justify-center">
           <h3 class="text-[32px] font-jersey">Grades</h3>
           <Button variant="secondary" icon="plus" type="button" @click="addGrade" />
