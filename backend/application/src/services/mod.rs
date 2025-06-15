@@ -11,3 +11,4 @@ pub use image_service::ImageService;
 pub use service_factory::ServiceFactory;
 pub use tierlist_service::TierlistService;
 pub use user_service::UserService;
+pub use websocket_service::*;

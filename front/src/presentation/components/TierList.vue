@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { useTierListStore } from '../stores/tierListStore'
 import { VueDraggable } from 'vue-draggable-plus'
 import ItemCard from '../components/ItemCard.vue'
@@ -9,14 +9,23 @@ import { io } from 'socket.io-client'
 const tierListStore = useTierListStore()
 const isDragging = ref(false)
 
-onMounted(async () => {
-  await tierListStore.getTierListById('6825d706c37c360531013170')
-  const socket = io('http://localhost:3000/api/ws').connect()
+const tierlistId = '6825d706c37c360531013170' // tierListStore.currentTierlist?.id
 
-  socket.io.on('ping', () => {
-    console.log('Ping received from server')
-  })
+const socket = io('http://localhost:3000/api/ws', { reconnectionDelayMax: 10000 }).connect()
+socket.on('tierlist', (updatedTierlist) => {
+  tierListStore.currentTierlist = updatedTierlist
 })
+
+socket.emit('join', tierlistId)
+
+const onDragStart = () => {
+  isDragging.value = true
+}
+
+const onDragEnd = () => {
+  isDragging.value = false
+  socket.emit('update', tierListStore.currentTierlist)
+}
 </script>
 
 <template>
@@ -45,8 +54,8 @@ onMounted(async () => {
           item-key="name"
           group="grades"
           class="flex-1 flex flex-wrap gap-2 rounded-md items-center"
-          @start="isDragging = true"
-          @end="isDragging = false"
+          :on-start="onDragStart"
+          :on-end="onDragEnd"
         >
           <div v-for="card in grade.cards" :key="card.name" class="w-19 h-19">
             <ItemCard :card="card" :grade="grade" :is-dragging="isDragging" />
@@ -58,8 +67,8 @@ onMounted(async () => {
         item-key="name"
         group="grades"
         class="flex-1 flex flex-wrap gap-2 rounded-md items-center"
-        @start="isDragging = true"
-        @end="isDragging = false"
+        :on-start="onDragStart"
+        :on-end="onDragEnd"
       >
         <div v-for="card in tierListStore.currentTierlist.cards" :key="card.name" class="w-19 h-19">
           <ItemCard :card="card" :is-dragging="isDragging" />
