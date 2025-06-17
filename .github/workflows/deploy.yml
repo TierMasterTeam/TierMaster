@@ -1,0 +1,89 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    outputs:
+      frontend_changed: ${{ steps.detect_changes.outputs.frontend_changed }}
+      backend_changed: ${{ steps.detect_changes.outputs.backend_changed }}
+      repo_lower: ${{ steps.set_env.outputs.repo_lower }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: UPPER to lower
+        id: set_env
+        run: |
+          echo "actor_lower=$(echo '${{ github.actor }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          echo "repo_lower=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          echo "::set-output name=repo_lower::$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')"
+
+      - name: Git fetch for diff
+        run: git fetch --prune --unshallow || true
+
+      - name: Detect changes
+        id: detect_changes
+        run: |
+          FRONTEND_CHANGED=false
+          BACKEND_CHANGED=false
+
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^front/'; then
+            FRONTEND_CHANGED=true
+          fi
+
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^backend/'; then
+            BACKEND_CHANGED=true
+          fi
+
+          echo "FRONTEND_CHANGED=$FRONTEND_CHANGED" >> $GITHUB_ENV
+          echo "BACKEND_CHANGED=$BACKEND_CHANGED" >> $GITHUB_ENV
+
+          echo "::set-output name=frontend_changed::$FRONTEND_CHANGED"
+          echo "::set-output name=backend_changed::$BACKEND_CHANGED"
+
+      - name: Docker login
+        run: echo "${{ secrets.ghrcToken }}" | docker login ghcr.io -u ${{ secrets.ghrcUser }} --password-stdin
+
+      - name: Build and push frontend
+        if: steps.detect_changes.outputs.frontend_changed == 'true'
+        run: |
+          touch ./front/.env
+          echo "${{ secrets.ENVFRONT }}" >> ./front/.env
+          docker build -f ./front/Dockerfile -t ghcr.io/${{ env.repo_lower }}/frontend:latest ./front
+          docker push ghcr.io/${{ env.repo_lower }}/frontend:latest
+
+      - name: Build and push backend
+        if: steps.detect_changes.outputs.backend_changed == 'true'
+        run: |
+          docker build -f ./backend/Dockerfile -t ghcr.io/${{ env.repo_lower }}/backend:latest ./backend
+          docker push ghcr.io/${{ env.repo_lower }}/backend:latest
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.frontend_changed == 'true' || needs.build.outputs.backend_changed == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy on server
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            cd /home/$(whoami)/tiermaster/setup-prod
+            echo "${{ secrets.ghrcToken }}" | docker login ghcr.io -u ${{ secrets.ghrcUser }} --password-stdin
+            git pull origin main
+            docker compose -f docker-compose.yml pull
+            docker compose -f docker-compose.yml up -d --remove-orphans
+            docker image prune -f

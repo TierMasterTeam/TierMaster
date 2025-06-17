@@ -2,6 +2,12 @@
 
 This is the backend API for the TierMaster application, built with Rust.
 
+## Contributors
+
+- FRIN Arthur
+- MENARD Paul
+- DHOMMEAUX Adrien
+
 ## Prerequisites
 
 - [Rust](https://www.rust-lang.org/tools/install) (version 1.85.1 or newer)

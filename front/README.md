@@ -1,5 +1,11 @@
 # front TierMaster
 
+## Contributors
+
+- FRIN Arthur
+- MENARD Paul
+- DHOMMEAUX Adrien
+
 ## Customize configuration
 
 ## Project Setup
