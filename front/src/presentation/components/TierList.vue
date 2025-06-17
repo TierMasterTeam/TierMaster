@@ -11,7 +11,7 @@ const isDragging = ref(false)
 
 const tierlistId = '6825d706c37c360531013170' // tierListStore.currentTierlist?.id
 
-const socket = io('http://localhost:3000/api/ws', { reconnectionDelayMax: 10000 }).connect()
+const socket = io(`${import.meta.env.VITE_API_URL}/ws`, { reconnectionDelayMax: 10000 }).connect()
 socket.on('tierlist', (updatedTierlist) => {
   tierListStore.currentTierlist = updatedTierlist
 })
