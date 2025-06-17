@@ -19,7 +19,7 @@ This is the backend API for the TierMaster application, built with Rust.
 
 ### Checking Rust Version
 
-To check if Rust is installed and verify the version:
+Check if Rust is installed and verify the version:
 
 ```bash
 rustc --version

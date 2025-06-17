@@ -62,7 +62,7 @@ jobs:
       - name: Build and push backend
         if: env.BACKEND_CHANGED == 'true'
         run: |
-          docker build -f ./backend/Dockerfile.prod -t ghcr.io/${{ env.REPO_LOWER }}/backend:latest ./backend
+          docker build -f ./backend/Dockerfile -t ghcr.io/${{ env.REPO_LOWER }}/backend:latest ./backend
           docker push ghcr.io/${{ env.REPO_LOWER }}/backend:latest
 
       - name: Deploy on server
