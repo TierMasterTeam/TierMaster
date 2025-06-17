@@ -9,62 +9,70 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build_and_deploy:
+  build:
     runs-on: ubuntu-latest
+
+    outputs:
+      frontend_changed: ${{ steps.detect_changes.outputs.frontend_changed }}
+      backend_changed: ${{ steps.detect_changes.outputs.backend_changed }}
+      repo_lower: ${{ steps.set_env.outputs.repo_lower }}
 
     steps:
       - uses: actions/checkout@v4
 
       - name: UPPER to lower
+        id: set_env
         run: |
-          echo "ACTOR_LOWER=$(echo '${{ github.actor }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-          echo "REPO_LOWER=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          echo "actor_lower=$(echo '${{ github.actor }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          echo "repo_lower=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          echo "::set-output name=repo_lower::$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')"
 
       - name: Git fetch for diff
         run: git fetch --prune --unshallow || true
 
-      - name: Check frontend changes
-        id: check_frontend
+      - name: Detect changes
+        id: detect_changes
         run: |
+          FRONTEND_CHANGED=false
+          BACKEND_CHANGED=false
+
           if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^front/'; then
-            echo "FRONTEND_CHANGED=true" >> $GITHUB_ENV
-          else
-            echo "FRONTEND_CHANGED=false" >> $GITHUB_ENV
+            FRONTEND_CHANGED=true
           fi
 
-      - name: Check backend changes
-        id: check_backend
-        run: |
           if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^backend/'; then
-            echo "BACKEND_CHANGED=true" >> $GITHUB_ENV
-          else
-            echo "BACKEND_CHANGED=false" >> $GITHUB_ENV
+            BACKEND_CHANGED=true
           fi
 
-      - name: Stop if no changes
-        run: |
-          if [[ "$FRONTEND_CHANGED" == "false" && "$BACKEND_CHANGED" == "false" ]]; then
-            echo "Aucun changement à déployer."
-            exit 0
-          fi
+          echo "FRONTEND_CHANGED=$FRONTEND_CHANGED" >> $GITHUB_ENV
+          echo "BACKEND_CHANGED=$BACKEND_CHANGED" >> $GITHUB_ENV
+
+          echo "::set-output name=frontend_changed::$FRONTEND_CHANGED"
+          echo "::set-output name=backend_changed::$BACKEND_CHANGED"
 
       - name: Docker login
         run: echo "${{ secrets.ghrcToken }}" | docker login ghcr.io -u ${{ secrets.ghrcUser }} --password-stdin
 
       - name: Build and push frontend
-        if: env.FRONTEND_CHANGED == 'true'
+        if: steps.detect_changes.outputs.frontend_changed == 'true'
         run: |
           touch ./front/.env
           echo "${{ secrets.ENVFRONT }}" >> ./front/.env
-          docker build -f ./front/Dockerfile -t ghcr.io/${{ env.REPO_LOWER }}/frontend:latest ./front
-          docker push ghcr.io/${{ env.REPO_LOWER }}/frontend:latest
+          docker build -f ./front/Dockerfile -t ghcr.io/${{ env.repo_lower }}/frontend:latest ./front
+          docker push ghcr.io/${{ env.repo_lower }}/frontend:latest
 
       - name: Build and push backend
-        if: env.BACKEND_CHANGED == 'true'
+        if: steps.detect_changes.outputs.backend_changed == 'true'
         run: |
-          docker build -f ./backend/Dockerfile -t ghcr.io/${{ env.REPO_LOWER }}/backend:latest ./backend
-          docker push ghcr.io/${{ env.REPO_LOWER }}/backend:latest
+          docker build -f ./backend/Dockerfile -t ghcr.io/${{ env.repo_lower }}/backend:latest ./backend
+          docker push ghcr.io/${{ env.repo_lower }}/backend:latest
 
+  deploy:
+    needs: build
+    if: needs.build.outputs.frontend_changed == 'true' || needs.build.outputs.backend_changed == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Deploy on server
         uses: appleboy/ssh-action@v0.1.10
         with:
