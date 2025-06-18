@@ -2,7 +2,7 @@
 import Button from '../components/base/Button.vue';
 import BaseInput from '../components/base/BaseInput.vue';
 import { ref, onMounted } from 'vue';
-import { CircleMinus } from 'lucide-vue-next';
+import { CircleMinus, Plus } from 'lucide-vue-next';
 import ImagePreviewInput from '../components/base/ImagePreviewInput.vue';
 import { VueDraggable } from 'vue-draggable-plus';
 import GradeInput from './GradeInput.vue';
@@ -151,7 +151,11 @@ const SaveTemplate = async () => {
             class="mb-4 max-w-sm block"
             v-model="currentCategory"
           />
-          <Button variant="secondary" type="submit" size="md" icon="plus" class="mb-4 h-11" />
+          <Button variant="secondary" type="submit" size="md" class="mb-4 h-11">
+            <template #icon>
+              <Plus class="w-5 h-5" />
+            </template>
+          </Button>
         </form>
 
         <ul class="flex flex-wrap pb-4 max-w-xl gap-4 mb-4">
@@ -226,7 +230,11 @@ const SaveTemplate = async () => {
 
         <div class="flex gap-4 items-center justify-center">
           <h3 class="text-[32px] font-jersey">Grades</h3>
-          <Button variant="secondary" icon="plus" type="button" @click="addGrade" />
+          <Button variant="secondary" type="button" @click="addGrade">
+            <template #icon>
+              <Plus class="w-5 h-5" />
+            </template>
+          </Button>
         </div>
         <div class="flex flex-col items-center justify-center w-fit h-fit border-2 border-white-custom rounded-xl p-4 mt-2">
           <VueDraggable v-model="template.grades" item-key="id" group="grades" class="flex-1 flex flex-col gap-2 rounded-md items-center">

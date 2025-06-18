@@ -2,7 +2,7 @@
 import BaseInput from '../components/base/BaseInput.vue';
 import Button from '../components/base/Button.vue';
 import { ref } from 'vue';
-import { Eye, EyeOff } from 'lucide-vue-next';
+import { Eye, EyeOff, LogIn } from 'lucide-vue-next';
 import { useAuthStore } from '../stores/authStore';
 import { useUtilsStore } from '../stores/utilsStore';
 import { useRoute, useRouter } from 'vue-router';
@@ -18,9 +18,9 @@ const showToast = useUtilsStore().showToast;
 
 const useLogin = async () => {
   try {
-    const success = await authStore.login({ 
-      email: username.value, 
-      password: password.value 
+    const success = await authStore.login({
+      email: username.value,
+      password: password.value
     });
 
     if (success) {
@@ -59,7 +59,10 @@ const useLogin = async () => {
                 </div>
             </div>
             <div class="flex items-center gap-4 pt-8 pl-4">
-                <Button type="submit" variant="primary" size="md" icon="login">
+                <Button type="submit" variant="primary" size="md">
+                    <template #icon>
+                        <LogIn class="w-5 h-5" />
+                    </template>
                     Login
                 </Button>
                 <router-link :to="{name: 'register'}" class="text-light-green-custom">

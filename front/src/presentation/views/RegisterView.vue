@@ -2,7 +2,7 @@
 import BaseInput from '../components/base/BaseInput.vue';
 import Button from '../components/base/Button.vue';
 import { ref } from 'vue';
-import { Eye, EyeOff } from 'lucide-vue-next';
+import { Eye, EyeOff, LogIn } from 'lucide-vue-next';
 import { useAuthStore } from '../stores/authStore';
 import { useRouter } from 'vue-router';
 import { useUtilsStore } from '../stores/utilsStore';
@@ -71,7 +71,10 @@ const useRegister = async () => {
                 </div>
             </div>
             <div class="flex items-center gap-4 pt-8 pl-4">
-                <Button type="submit" variant="primary" size="md" icon="login">
+                <Button type="submit" variant="primary" size="md">
+                    <template #icon>
+                        <LogIn class="w-5 h-5" />
+                    </template>
                     Signup
                 </Button>
                 <router-link :to="{name: 'login'}" class="text-light-green-custom">

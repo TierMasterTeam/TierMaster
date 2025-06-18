@@ -1,35 +1,17 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Plus, ImageUp, Rows3, LogIn } from 'lucide-vue-next'
-
 // Props types
 type Size = 'sm' | 'md' | 'lg'
 type ButtonType = 'button' | 'submit' | 'reset'
-type IconName = 'plus' | 'image-up' | 'rows-3' | 'login' | '';
 
 const props = withDefaults(defineProps<{
   type?: ButtonType
   size?: Size
-  icon?: IconName
   variant?: 'primary' | 'secondary' | 'danger'
 }>(), {
   type: 'button',
   size: 'md',
   variant: 'primary',
-  icon: '',
 })
-
-// Icon mapping
-const iconMap: Record<IconName, any> = {
-  'plus': Plus,
-  'image-up': ImageUp,
-  'rows-3': Rows3,
-  'login': LogIn,
-  '': null,
-}
-
-// Using computed for icons
-const IconComponent = computed(() => iconMap[props.icon])
 
 // Explicit definition of events
 const emit = defineEmits(['click'])
@@ -51,7 +33,7 @@ const emit = defineEmits(['click'])
     ]"
     @click="$emit('click')"
   >
-    <component v-if="IconComponent" :is="IconComponent" class="w-5 h-5" />
+    <slot name="icon"></slot>
     <slot />
   </button>
 </template>
