@@ -1,5 +1,5 @@
 <template>
-<footer class="hidden border-t-1 border-t-white-custom md:flex justify-between px-5 h-[200px] py-9">
+<footer class="hidden border-t-1 border-t-gray-custom md:flex justify-between px-5 h-[200px] py-9">
   <div class="left flex flex-col text-light-green-custom gap-6">
     <router-link class="block" :to="{name: 'privacyPolicy'}">
       Privacy Policy

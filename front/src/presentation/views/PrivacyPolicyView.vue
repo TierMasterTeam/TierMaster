@@ -59,6 +59,5 @@ import Footer from '../components/Footer.vue';
     </a>
   </p>
 </div>
-<Footer/>
 
 </template>

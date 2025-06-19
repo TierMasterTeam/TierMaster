@@ -2,10 +2,11 @@ export interface TierList {
   id?: string;
   name: string;
   author: string;
+  imgCover?: string;
+  is_public: boolean;
   tags: string[];
   cards: Card[];
   grades: Grade[];
-
 }
 
 export interface Grade {

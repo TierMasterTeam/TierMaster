@@ -20,7 +20,6 @@ onMounted(async () => {
     }
     try {
         templates.value = await tierListStore.getUserTemplates(user.id);
-        console.log('Templates loaded:', templates.value);
     } catch (error) {
         console.error('Error loading templates:', error);
     }
@@ -28,9 +27,7 @@ onMounted(async () => {
 
 const createTempateAction = async() => {
     // Logic to create a new template
-    console.log('Create new template action triggered');
     const id = await tierListStore.initTemplate();
-    console.log('New template created with ID:', id);
     if (id) {
         router.push({
             name: 'myTemplate',
