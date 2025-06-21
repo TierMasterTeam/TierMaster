@@ -21,9 +21,9 @@ const tierListStore = useTierListStore();
 // Filtrer les templates en fonction de la recherche
 const filteredTemplates = computed(() => {
   if (!searchQuery.value.trim()) return templates.value;
-  
+
   const query = searchQuery.value.toLowerCase();
-  return templates.value.filter(template => 
+  return templates.value.filter(template =>
     template.name.toLowerCase().includes(query)
   );
 });
@@ -51,7 +51,7 @@ const createTempateAction = async() => {
         console.error('Failed to create a new template');
     }
 
-    
+
 };
 
 </script>
@@ -60,11 +60,11 @@ const createTempateAction = async() => {
     <div class="w-fit flex flex-col">
       <h1 class="font-jersey pt-16 text-[80px] tracking-widest text-light-green-custom">TierMaster</h1>
       <div class="flex flex-col md:flex-row w-full justify-between">
-        <BaseInput 
+        <BaseInput
           v-model="searchQuery"
-          label="Search for a template" 
-          placeholder="Search..." 
-          class="max-w-[39rem] w-full" 
+          :label="$t('home.searchForTemplate')"
+          :placeholder="$t('home.searchPlaceholder')"
+          class="max-w-[39rem] w-full"
           id="searchInput"
         >
           <template #right>
@@ -77,20 +77,20 @@ const createTempateAction = async() => {
           <template #icon>
             <LayoutPanelTop class="w-5 h-5" />
           </template>
-          Create your template
+          {{ $t('home.createYourTemplate') }}
         </Button>
       </div>
 
-      
+
       <div v-if="searchQuery === ''" class="pt-8 pb-4">
-        <h2 class="font-jersey tracking-widest text-[2.5rem] pb-4">Popular Templates</h2>
+        <h2 class="font-jersey tracking-widest text-[2.5rem] pb-4">{{ $t('home.popularTemplates') }}</h2>
         <TemplateCarousel
           :templates="templates"
         />
 
-        <h2 class="font-jersey tracking-widest text-[2.5rem] pt-16">What's New</h2>
-        <p class="max-w-[740px] px-4 pb-16">Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.</p>
-        <h2 class="font-jersey tracking-widest text-[2.5rem] pb-4">Recent Templates</h2>
+        <h2 class="font-jersey tracking-widest text-[2.5rem] pt-16">{{ $t('home.whatsNew') }}</h2>
+        <p class="max-w-[740px] px-4 pb-16">{{ $t('home.whatsNewDesc') }}</p>
+        <h2 class="font-jersey tracking-widest text-[2.5rem] pb-4">{{ $t('home.recentTemplates') }}</h2>
         <TemplateCarousel
           :templates="templates"
           class="pb-32"
@@ -98,16 +98,16 @@ const createTempateAction = async() => {
       </div>
 
       <div v-else>
-        <div class="pt-8 pb-4">{{ resultNb }} results</div>
+        <div class="pt-8 pb-4">{{ resultNb }} {{ $t('home.results') }}</div>
         <div v-if="searchQuery !== '' && filteredTemplates.length > 0" class="grid w-fit grid-cols-1 grid2:grid-cols-2 grid3:grid-cols-3 grid4:grid-cols-4 gap-4">
           <TemplateCard
-            v-for="template in filteredTemplates" 
+            v-for="template in filteredTemplates"
             :key="template.id"
             :template="template"
           />
         </div>
         <div v-else class="text-center py-8 text-light-gray-custom min-w-[284px] grid2:min-w-[592px] grid3:min-w-[896px] grid4:min-w-[1200px]">
-          No templates found matching "{{ searchQuery }}"
+          {{ $t('home.noTemplatesFound', { query: searchQuery }) }}
         </div>
       </div>
     </div>

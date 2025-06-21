@@ -37,12 +37,12 @@ const createTempateAction = async() => {
         console.error('Failed to create a new template');
     }
 
-    
+
 };
 
 const getUntitledIndex = (template: TierList, index: number): number => {
     if (template.name) return 0;
-    
+
     // Count how many untitled templates exist before this one
     let count = 0;
     for (let i = 0; i < templates.value.length; i++) {
@@ -58,22 +58,22 @@ const getUntitledIndex = (template: TierList, index: number): number => {
 <template>
     <div class="flex flex-col p-16">
         <h1 class="text-[40px] font-jersey">
-            TierList templates
+            {{ $t('templates.title') }}
         </h1>
         <Button size="md" variant="primary" class="mt-4 w-fit" @click="createTempateAction">
-            Create new template
+            {{ $t('templates.createNew') }}
         </Button>
         <ul class="flex flex-col mt-4 border-2 border-white-custom">
             <li v-for="(template, index) in templates" class="flex items-center justify-between p-2 border-b-2 border-white-custom">
                 <div>
-                    {{ template.name || `Untitled Template ${getUntitledIndex(template, index)}` }}
+                    {{ template.name || $t('templates.untitled', { n: getUntitledIndex(template, index) }) }}
                 </div>
                 <div class="flex gap-2">
                     <Button size="sm" variant="primary" @click="() => router.push({ name: 'myTemplate', params: { id: template.id } })">
-                        Edit
+                        {{ $t('templates.edit') }}
                     </Button>
                     <Button size="sm" variant="danger" @click="() => console.log('Delete template', template.id)">
-                        Delete
+                        {{ $t('templates.delete') }}
                     </Button>
                 </div>
             </li>

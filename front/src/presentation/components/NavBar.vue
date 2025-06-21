@@ -1,11 +1,18 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/authStore';
-const route = useRoute()
 
+import { useI18n } from 'vue-i18n'
+const route = useRoute()
 const authStore = useAuthStore()
 const isLoggedIn = authStore.isLoggedIn
 const user = authStore.user
+
+const { locale } = useI18n()
+const switchLocale = (lang: string) => {
+  locale.value = lang
+  localStorage.setItem('locale', lang)
+}
 
 const useLogout = () => {
   authStore.logout()
@@ -25,30 +32,47 @@ const useLogout = () => {
             to="/"
             class="nav-link"
             :class="{ 'nav-link-active': route.name === 'home' }"
-          >Home</router-link>
+          >{{ $t('nav.home') }}</router-link>
         </li>
         <li>
           <router-link
             :to="{name: 'myTemplates'}"
             class="nav-link"
             :class="{ 'nav-link-active': route.name === 'myTemplates' }"
-          >My templates</router-link>
+          >{{ $t('nav.myTemplates') }}</router-link>
         </li>
       </ul>
     </div>
-    <button v-if="isLoggedIn" @click="useLogout">
-      <img src="../../assets/pp.png" alt="profile picture" class="rounded-full w-10 h-10 object-cover">
-    </button>
-    <template v-else>
-      <div class="flex gap-4">
-        <router-link to="/register" class="auth-link">Register</router-link>
-        <router-link to="/login" class="auth-link">Login</router-link>
-      </div>
-    </template>
+    <div class="flex items-center gap-4">
+      <button @click="switchLocale(locale === 'fr' ? 'en' : 'fr')" class="lang-btn px-2 font-bold text-white">
+        {{ locale === 'fr' ? 'fr' : 'en' }}
+      </button>
+      <template v-if="isLoggedIn">
+        <button @click="useLogout">
+          <img src="../../assets/pp.png" alt="profile picture" class="rounded-full w-10 h-10 object-cover">
+        </button>
+      </template>
+      <template v-else>
+        <router-link to="/register" class="auth-link">{{ $t('nav.register') }}</router-link>
+        <router-link to="/login" class="auth-link">{{ $t('nav.login') }}</router-link>
+      </template>
+    </div>
+
   </nav>
 </template>
 
 <style scoped>
+.lang-btn {
+  background: none;
+  border: none;
+  padding: 0 2px;
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.1s;
+}
+.lang-btn:active {
+  transform: scale(0.95);
+}
 .nav-link {
   position: relative;
   transition: color 0.3s;
