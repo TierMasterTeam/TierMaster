@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import NavBarLayout from '../layouts/NavBarLayout.vue'
 import TierListView from '../views/TierListView.vue'
 import { useAuthStore } from '@stores/authStore'
+import HomeView from '../views/HomeView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,7 +12,7 @@ const router = createRouter({
       path: '/',
       component: NavBarLayout,
       children: [
-        { path: '', name: 'home', component: TierListView },
+        { path: '', name: 'home', component: HomeView },
       ],
     },
     // Protected routes
@@ -67,9 +68,9 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   const requiresAuth = to.meta.requiresAuth || false
-  
+
   const isAuthenticated = await authStore.checkAuth()
-  
+
   if (requiresAuth && !isAuthenticated) {
     next({ name: 'login', query: { redirect: to.fullPath } })
   } else {
