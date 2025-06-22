@@ -31,6 +31,6 @@
 }
 #app {
   @apply bg-dark-gray-custom
-  @apply text-white-custom
   min-h-screen
+  text-white-custom
 }
