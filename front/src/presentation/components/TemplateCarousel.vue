@@ -84,7 +84,7 @@ function goRight() {
 
 <template>
   <div class="flex flex-col items-center w-full">
-    <div class="flex items-center w-full justify-center gap-2 relative">
+    <div class="flex items-center w-fit justify-center gap-2 relative">
       <button @click="goLeft" :disabled="!canGoLeft" class="p-2 text-2xl absolute right-full " aria-label="Previous">
         <CircleChevronLeft class="w-6 h-6" :class="{'opacity-30': !canGoLeft}" />
       </button>

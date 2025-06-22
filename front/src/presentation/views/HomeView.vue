@@ -58,13 +58,13 @@ const createTempateAction = async() => {
 <template>
   <div class="flex flex-col px-4 items-center">
     <div class="w-fit flex flex-col">
-      <h1 class="font-jersey pt-16 text-[80px] tracking-widest text-light-green-custom">TierMaster</h1>
-      <div class="flex flex-col md:flex-row w-full justify-between">
+      <h1 class="font-jersey pt-16 text-6xl md:text-[80px] tracking-widest text-light-green-custom">TierMaster</h1>
+      <div class="flex flex-col md:flex-row w-full justify-between gap-4">
         <BaseInput
           v-model="searchQuery"
           :label="$t('home.searchForTemplate')"
           :placeholder="$t('home.searchPlaceholder')"
-          class="max-w-[39rem] w-full"
+          class="max-w-[39rem] flex-grow"
           id="searchInput"
         >
           <template #right>

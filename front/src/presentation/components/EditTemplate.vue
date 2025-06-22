@@ -12,7 +12,9 @@ import { useAuthStore } from '../stores/authStore';
 import { useRoute } from 'vue-router';
 import { useUtilsStore } from '../stores/utilsStore';
 import pp from '../../assets/pp.png'; // Placeholder image import
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const showToast = useUtilsStore().showToast;
 const tierListStore = useTierListStore();
 const authStore = useAuthStore();
@@ -47,10 +49,10 @@ const onCoverFileChange = async (event: Event) => {
       const res = await tierListStore.uploadImages(formData);
       if (res) {
         // template.value!.coverImage = res; // backend retourne une URL
-        showToast('Cover image updated successfully', 'success');
+        showToast(t('editTemplate.coverSuccess'), 'success');
       }
     } catch (error) {
-      showToast('Error uploading cover image', 'error');
+      showToast(t('editTemplate.coverError'), 'error');
       console.error('Error uploading cover image:', error);
     }
   }
@@ -116,9 +118,9 @@ const SaveTemplate = async () => {
 
   try {
     await tierListStore.updateTemplate(template.value!);
-    showToast('Template updated successfully', 'success');
+    showToast(t('editTemplate.updateSuccess'), 'success');
   } catch (error) {
-    showToast('Error updating template', 'error');
+    showToast(t('editTemplate.updateError'), 'error');
     console.error('Error updating template:', error);
   }
 };
@@ -130,24 +132,24 @@ const SaveTemplate = async () => {
     <div class="flex w-full justify-between flex-col md:flex-row">
       <div class="w-full">
         <label for="templateName">
-          <h1 class="text-[40px] font-jersey">Tierlist Title</h1>
+          <h1 class="text-[40px] font-jersey">{{ $t('editTemplate.title') }}</h1>
         </label>
         <BaseInput
           id="templateName"
           type="text"
-          placeholder="My Tierlist title ..."
+          :placeholder="$t('editTemplate.titlePlaceholder')"
           class="mb-4 min-w-sm w-1/3 max-w-2xl"
           v-model="template.name"
         />
 
         <label for="category">
-          <h2 class="text-2xl font-jersey">Add #categories</h2>
+          <h2 class="text-2xl font-jersey">{{ $t('editTemplate.addCategories') }}</h2>
         </label>
         <form class="flex gap-2" @submit.prevent="addCategory">
           <BaseInput
             id="category"
             type="text"
-            placeholder="category ..."
+            :placeholder="$t('editTemplate.categoryPlaceholder')"
             class="mb-4 max-w-sm block"
             v-model="currentCategory"
           />
@@ -183,7 +185,7 @@ const SaveTemplate = async () => {
               @click="triggerAddToPreview"
               class="mt-4"
             >
-              Add to the tierlist
+              {{ $t('editTemplate.addToTierlist') }}
             </Button>
           </div>
 
@@ -202,7 +204,7 @@ const SaveTemplate = async () => {
                 <button
                   @click.stop="removePreviewImage(idx)"
                   class="absolute w-6 h-6 rounded-full bg-light-gray-custom -top-2 -right-3 z-10 flex items-center justify-center cursor-pointer border-none"
-                  aria-label="Remove image"
+                  :aria-label="$t('editTemplate.removeImage')"
                 >
                   <CircleMinus />
                 </button>
@@ -211,7 +213,7 @@ const SaveTemplate = async () => {
                 </div>
               </div>
             </div>
-            <div v-else>No images added yet.</div>
+            <div v-else>{{ $t('editTemplate.noImages') }}</div>
           </div>
         </div>
       </div>
@@ -219,17 +221,17 @@ const SaveTemplate = async () => {
       <div class="flex flex-col items-center">
         <div>
           <label for="coverImageInput" class="w-100 h-50 block mb-12">
-            <h3 class="text-2xl font-jersey">TierList Cover</h3>
-            <img v-if="coverImgUrl" :src="coverImgUrl" alt="Cover Image" class="w-full h-full object-cover rounded-md border-white-custom border-2" />
+            <h3 class="text-2xl font-jersey">{{ $t('editTemplate.cover') }}</h3>
+            <img v-if="coverImgUrl" :src="coverImgUrl" :alt="$t('editTemplate.coverAlt')" class="w-full h-full object-cover rounded-md border-white-custom border-2" />
             <div v-else class="w-full h-full flex items-center justify-center bg-light-gray-custom rounded-md mb-4 border-white-custom border-2 text-gray-500">
-              No cover image selected
+              {{ $t('editTemplate.noCover') }}
             </div>
           </label>
           <input type="file" accept="image/*" @change="onCoverFileChange" class="hidden" id="coverImageInput" />
         </div>
 
         <div class="flex gap-4 items-center justify-center">
-          <h3 class="text-[32px] font-jersey">Grades</h3>
+          <h3 class="text-[32px] font-jersey">{{ $t('editTemplate.grades') }}</h3>
           <Button variant="secondary" type="button" @click="addGrade">
             <template #icon>
               <Plus class="w-5 h-5" />
@@ -253,10 +255,10 @@ const SaveTemplate = async () => {
 
     <div class="flex pt-16">
       <Button variant="secondary" type="button" size="lg" class="mt-4" @click="SaveTemplate()">
-        Save Template
+        {{ $t('editTemplate.save') }}
       </Button>
       <Button variant="primary" type="button" size="lg" class="mt-4 ml-4" @click="SaveTemplate()">
-        Publish Template
+        {{ $t('editTemplate.publish') }}
       </Button>
     </div>
   </main>
