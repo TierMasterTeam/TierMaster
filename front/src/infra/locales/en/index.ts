@@ -5,6 +5,8 @@ import termsOfUse from './termsOfUse'
 import editTemplate from './editTemplate'
 import footer from './footer'
 import templates from './templates'
+import login from './login'
+import register from './register'
 
 export default {
   nav,
@@ -14,4 +16,6 @@ export default {
   editTemplate,
   footer,
   templates,
+  login,
+  register,
 }
