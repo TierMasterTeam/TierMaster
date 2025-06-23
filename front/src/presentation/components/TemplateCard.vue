@@ -20,18 +20,21 @@ const getTemplateImage = (template: TierList) => {
 };
 
 const navigateToTemplate = () => {
-  router.push(`/tierlist/${props.template.id}`);
+  router.push({
+    name: 'tierList',
+    params: { id: props.template.id },
+  });
 };
 </script>
 
 <template>
-  <button 
+  <button
     class="w-2xs rounded-xl border-2 overflow-hidden cursor-pointer hover:border-light-green-custom transition-colors duration-200"
     @click="navigateToTemplate"
   >
-    <img 
-      :src="getTemplateImage(template)" 
-      :alt="template.name" 
+    <img
+      :src="getTemplateImage(template)"
+      :alt="template.name"
       class="h-48 w-full object-cover bg-gray-50"
     >
     <div class="h-25 border-t-2 flex items-center justify-center p-4">

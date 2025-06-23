@@ -15,6 +15,13 @@ const router = createRouter({
         { path: '', name: 'home', component: HomeView },
       ],
     },
+    {
+      path: '/tierlist/:id',
+      component: NavBarLayout,
+      children: [
+        { path: '', name: 'tierList', component: TierListView },
+      ]
+    },
     // Protected routes
     {
       path: '/my-templates',

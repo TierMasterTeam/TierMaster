@@ -9,8 +9,9 @@ import { io } from 'socket.io-client'
 const tierListStore = useTierListStore()
 const isDragging = ref(false)
 
-const tierlistId = '6825d706c37c360531013170' // tierListStore.currentTierlist?.id
-
+import { useRoute } from 'vue-router'
+const route = useRoute()
+const tierlistId = route.params.id
 const socket = io(`${import.meta.env.VITE_API_URL}/ws`, { reconnectionDelayMax: 10000 }).connect()
 socket.on('tierlist', (updatedTierlist) => {
   tierListStore.currentTierlist = updatedTierlist
@@ -75,7 +76,7 @@ const onDragEnd = () => {
         </div>
       </VueDraggable>
     </div>
-    <Button
+    <!-- <Button
       type="button"
       variant="primary"
       size="md"
@@ -83,7 +84,7 @@ const onDragEnd = () => {
       @click="tierListStore.saveTierList"
     >
       Save Tierlist
-    </Button>
+    </Button> -->
   </div>
 </template>
 
