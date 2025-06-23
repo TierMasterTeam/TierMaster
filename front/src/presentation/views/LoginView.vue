@@ -43,7 +43,7 @@ const useLogin = async () => {
 </script>
 
 <template>
-    <div class="bg-gradient-to-br from-dark-gray-custom from-[38.07%] to-dark-green-custom to-[131.95%] min-h-svh flex flex-col items-center justify-center">
+    <div class="bg-gradient-to-br from-dark-gray-custom from-[38.07%] to-dark-green-custom to-[131.95%] min-h-dvh flex flex-col items-center justify-center">
         <form @submit.prevent="useLogin()">
             <div class="flex md:h-[132px] gap-8 flex-col md:flex-row">
                 <img src="../../assets/logo.svg" width="167" height="132" alt="Logo" />

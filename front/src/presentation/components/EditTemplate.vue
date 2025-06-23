@@ -129,7 +129,7 @@ const SaveTemplate = async () => {
 
 <template>
   <main class="p-16" v-if="template">
-    <div class="flex w-full justify-between flex-col md:flex-row">
+    <div class="flex w-full justify-between flex-col md:flex-row pt-40 md:pt-0">
       <div class="w-full">
         <label for="templateName">
           <h1 class="text-[40px] font-jersey">{{ $t('editTemplate.title') }}</h1>
@@ -218,19 +218,19 @@ const SaveTemplate = async () => {
         </div>
       </div>
 
-      <div class="flex flex-col items-center">
-        <div>
-          <label for="coverImageInput" class="w-100 h-50 block mb-12">
-            <h3 class="text-2xl font-jersey">{{ $t('editTemplate.cover') }}</h3>
-            <img v-if="coverImgUrl" :src="coverImgUrl" :alt="$t('editTemplate.coverAlt')" class="w-full h-full object-cover rounded-md border-white-custom border-2" />
-            <div v-else class="w-full h-full flex items-center justify-center bg-light-gray-custom rounded-md mb-4 border-white-custom border-2 text-gray-500">
+      <div class="flex flex-col md:items-center">
+        <div class="absolute top-0 left-0 w-full md:relative">
+          <label for="coverImageInput" class="w-full md:w-100 h-50 block mb-12">
+            <h3 class="hidden md:block text-2xl font-jersey">{{ $t('editTemplate.cover') }}</h3>
+            <img v-if="coverImgUrl" :src="coverImgUrl" :alt="$t('editTemplate.coverAlt')" class="w-full h-full object-cover md:rounded-md md:border-white-custom md:border-2" />
+            <div v-else class="w-full h-full flex items-center justify-center bg-light-gray-custom md:rounded-md mb-4 md:border-white-custom md:border-2 text-gray-500">
               {{ $t('editTemplate.noCover') }}
             </div>
           </label>
           <input type="file" accept="image/*" @change="onCoverFileChange" class="hidden" id="coverImageInput" />
         </div>
 
-        <div class="flex gap-4 items-center justify-center">
+        <div class="flex w-full mt-8 md:mt-0 gap-4 md:items-center md:justify-center">
           <h3 class="text-[32px] font-jersey">{{ $t('editTemplate.grades') }}</h3>
           <Button variant="secondary" type="button" @click="addGrade">
             <template #icon>
