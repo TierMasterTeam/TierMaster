@@ -6,7 +6,7 @@ use domain::mappers::TryEntityMapper;
 use domain::repositories::AbstractTierlistRepository;
 use futures::StreamExt;
 use mongodb::bson::oid::ObjectId;
-use mongodb::bson::{doc, Document};
+use mongodb::bson::doc;
 use mongodb::{Collection, Cursor, Database};
 
 #[derive(Clone)]
@@ -89,18 +89,6 @@ impl AbstractTierlistRepository for TierlistRepository {
 
         Ok(())
     }
-
-    async fn search(&self, search_title: &str, search_tags: Vec<&str>) -> Result<Vec<TierlistEntity>, ApiError> {
-        let query = build_query_for_full_search(search_title, search_tags);
-
-        let cursor = self.collection.find(query)
-            .await
-            .map_err(|e| ApiError::InternalError(format!("Failed to execute search : {e}")))?;
-
-        let result = collect_cursor_to_list_of_tierlist_entity(cursor).await;
-
-        Ok(result)
-    }
 }
 
 async fn find_tierlist_by_id(collection: &Collection<TierlistModel>, id: ObjectId) -> Result<TierlistModel, ApiError> {
@@ -120,27 +108,4 @@ async fn collect_cursor_to_list_of_tierlist_entity(cursor:  Cursor<TierlistModel
         })
         .collect()
         .await
-}
-
-fn build_query_for_full_search(title: &str, tags: Vec<&str>) -> Document {
-    if tags.is_empty() {
-        return doc! {
-            "name": doc! {
-                "$regex": title,
-                "$options": "i"
-            },
-        }
-    }
-
-    if title.is_empty() {
-        return doc! {"tags": doc! { "$all": tags } }
-    }
-
-    doc! {
-        "name": doc! {
-            "$regex": title,
-            "$options": "i"
-        },
-        "tags": doc! { "$all": tags }
-    }
 }

@@ -1,0 +1,50 @@
+meta {
+  name: template by id
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{host}}/template/685ee04a6334fff39e36d632
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "name": "Programming Language 1",
+      "author": "680e46891ebc105fca81ba97",
+      "is_public": false,
+      "tags": [
+        "Dev",
+        "Language"
+      ],
+      "cards": [
+          { "name": "TypeScript", "image": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" },
+          { "name": "Python", "image": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" }
+      ],
+      "grades": [
+          {
+              "name": "S",
+              "color": "#F55B5B"
+          },
+          {
+              "name": "A",
+              "color": "#FF8652"
+          },
+          {
+              "name": "B",
+              "color": "#FBAE56"
+          },
+          {
+              "name": "C",
+              "color": "#FFE553"
+          },
+          {
+              "name": "D",
+              "color": "#64EDD2"
+          }
+      ]
+  }
+  
+}

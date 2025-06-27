@@ -5,6 +5,7 @@ mod auth_service;
 mod auth_redis_service;
 mod image_service;
 mod websocket_service;
+mod template_service;
 
 pub use auth_service::AuthService;
 pub use image_service::ImageService;
