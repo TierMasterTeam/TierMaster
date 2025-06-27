@@ -1,6 +1,6 @@
 use crate::error::ApiErrorResponse;
 use crate::presenters::{CreateTemplatePresenter, SearchQueryPresenter, TemplatePresenter, UpdateTemplatePresenter};
-use crate::states::AuthSession;
+use crate::states::{AuthSession, OptionalAuthSession};
 use crate::types::PaginatedResponse;
 use application::AppState;
 use axum::extract::{Path, Query, State};
@@ -54,14 +54,14 @@ async fn update_template_by_id(
 
     let original_template = state.services()
         .template()
-        .get_template_by_id(id.as_str())
+        .get_template_by_id(id.as_str(), Some(auth.user_id.clone()))
         .await?;
 
     let is_not_author_of_template = auth.user_id.ne(&original_template.author);
     let updating_is_public =  original_template.is_public.ne(&template.is_public);
     if is_not_author_of_template && updating_is_public {
         return Err(ApiErrorResponse::new(
-            StatusCode::UNAUTHORIZED,
+            StatusCode::FORBIDDEN,
             "Only the author has the right to change the visibility of a template.".to_string()
         ));
     }
@@ -75,12 +75,15 @@ async fn update_template_by_id(
 }
 
 async fn get_template_by_id(
+    optional_auth_session: OptionalAuthSession,
     Path(id): Path<String>,
     State(state): State<Arc<AppState>>,
 ) -> Result<TemplatePresenter, ApiErrorResponse> {
+    let user_id = optional_auth_session.auth_state.map(|auth| auth.user_id);
+    
     let result = state.services()
         .template()
-        .get_template_by_id(id.as_str())
+        .get_template_by_id(id.as_str(), user_id)
         .await?;
 
     Ok(TemplatePresenter::from(result))

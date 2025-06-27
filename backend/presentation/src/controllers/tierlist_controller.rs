@@ -1,6 +1,6 @@
 use crate::error::ApiErrorResponse;
 use crate::presenters::{CreateTierlistPresenter, TierlistPresenter, UpdateTierlistPresenter};
-use crate::states::AuthSession;
+use crate::states::{AuthSession, OptionalAuthSession};
 use application::AppState;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
@@ -52,14 +52,14 @@ async fn update_tierlist_by_id(
 
     let original_tierlist = state.services()
         .tierlist()
-        .get_tierlist_by_id(id.as_str())
+        .get_tierlist_by_id(id.as_str(), Some(auth.user_id.clone()))
         .await?;
 
     let is_not_author_of_tierlist = auth.user_id.ne(&original_tierlist.author);
-    let updating_is_public =  original_tierlist.is_public.ne(&tierlist.is_public);
+    let updating_is_public = original_tierlist.is_public.ne(&tierlist.is_public);
     if is_not_author_of_tierlist && updating_is_public {
         return Err(ApiErrorResponse::new(
-            StatusCode::UNAUTHORIZED,
+            StatusCode::FORBIDDEN,
             "Only the author has the right to change the visibility of a tierlist.".to_string()
         ));
     }
@@ -82,28 +82,30 @@ async fn get_all_tierlists(State(state): State<Arc<AppState>>) -> Result<Json<Ve
 }
 
 async fn get_tierlist_by_id(
+    auth: OptionalAuthSession,
     Path(id): Path<String>,
     State(state): State<Arc<AppState>>,
 ) -> Result<TierlistPresenter, ApiErrorResponse> {
+    
+    let user_id = auth.auth_state.map(|session| session.user_id);
+    
     let result = state.services()
         .tierlist()
-        .get_tierlist_by_id(id.as_str())
+        .get_tierlist_by_id(id.as_str(), user_id)
         .await?;
 
     Ok(TierlistPresenter::from(result))
 }
 
 async fn get_tierlists_of_user(
-    _auth: AuthSession,
+    auth: AuthSession,
     Path(id): Path<String>,
     State(state): State<Arc<AppState>>,
 ) -> Result<Json<Vec<TierlistPresenter>>, ApiErrorResponse> {
     
-    // TODO : add logic to check if user (auth.user_id) has the right to see tierlist 
-    
     let result = state.services()
         .tierlist()
-        .get_tierlists_of_user(id.as_str())
+        .get_tierlists_of_user(id.as_str(), auth.user_id == id)
         .await?;
 
     Ok(Json(result.into_iter().map(TierlistPresenter::from).collect()))

@@ -7,6 +7,7 @@ pub enum ApiError {
     InternalError(String),
     BadRequest(String),
     Unauthorized(String),
+    Forbidden(String),
 }
 
 impl Display for ApiError {

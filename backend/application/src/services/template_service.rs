@@ -12,8 +12,8 @@ pub struct TemplateService {
 }
 
 impl TemplateService {
-    pub async fn get_template_by_id(&self, id: &str) -> Result<TemplateEntity, ApiError> {
-        self.repo.get_template_by_id(id).await
+    pub async fn get_template_by_id(&self, id: &str, user_id: Option<String>) -> Result<TemplateEntity, ApiError> {
+        self.repo.get_template_by_id(id, user_id).await
     }
 
     pub async fn get_templates_of_user(&self, user_id: &str, can_see_private_templates: bool) -> Result<Vec<TemplateEntity>, ApiError> {

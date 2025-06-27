@@ -14,12 +14,12 @@ impl TierlistService {
         self.repo.get_all_tierlists().await
     }
 
-    pub async fn get_tierlist_by_id(&self, id: &str) -> Result<TierlistEntity, ApiError> {
-        self.repo.get_tierlist_by_id(id).await
+    pub async fn get_tierlist_by_id(&self, id: &str, user_id: Option<String>) -> Result<TierlistEntity, ApiError> {
+        self.repo.get_tierlist_by_id(id, user_id).await
     }
 
-    pub async fn get_tierlists_of_user(&self, user_id: &str) -> Result<Vec<TierlistEntity>, ApiError> {
-        self.repo.get_tierlist_of_user(user_id).await
+    pub async fn get_tierlists_of_user(&self, user_id: &str, can_see_private_tierlists: bool) -> Result<Vec<TierlistEntity>, ApiError> {
+        self.repo.get_tierlist_of_user(user_id, can_see_private_tierlists).await
     }
 
     pub async fn create_tierlist(&self, tierlist: CreateTierlistEntity) -> Result<String, ApiError> {

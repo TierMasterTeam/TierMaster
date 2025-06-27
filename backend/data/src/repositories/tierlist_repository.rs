@@ -5,8 +5,8 @@ use domain::error::ApiError;
 use domain::mappers::TryEntityMapper;
 use domain::repositories::AbstractTierlistRepository;
 use futures::StreamExt;
-use mongodb::bson::oid::ObjectId;
 use mongodb::bson::doc;
+use mongodb::bson::oid::ObjectId;
 use mongodb::{Collection, Cursor, Database};
 
 #[derive(Clone)]
@@ -24,7 +24,8 @@ impl TierlistRepository {
 #[async_trait]
 impl AbstractTierlistRepository for TierlistRepository {
     async fn get_all_tierlists(&self) -> Result<Vec<TierlistEntity>, ApiError> {
-        let cursor = self.collection.find(doc! {})
+        let query = doc! {"is_public": true};
+        let cursor = self.collection.find(query)
             .await
             .map_err(|e| ApiError::InternalError(format!("Failed to execute query: {e}")))?;
 
@@ -33,20 +34,34 @@ impl AbstractTierlistRepository for TierlistRepository {
         Ok(result)
     }
 
-    async fn get_tierlist_by_id(&self, id: &str) -> Result<TierlistEntity, ApiError> {
+    async fn get_tierlist_by_id(&self, id: &str, user_id: Option<String>) -> Result<TierlistEntity, ApiError> {
         let id = ObjectId::parse_str(id)
             .map_err(|err| ApiError::BadRequest(err.to_string()))?;
 
         let tierlist = find_tierlist_by_id(&self.collection, id).await?;
+        
+        let tierlist_is_private = !tierlist.is_public;
+        let user_is_not_author = match &user_id {
+            Some(uid) => tierlist.author.to_string() != *uid,
+            None => true,
+        };
+        
+        if tierlist_is_private && user_is_not_author {
+            return Err(ApiError::Forbidden("You do not have permission to access this tierlist because it is private.".to_string()));
+        }
 
         Ok(tierlist.to_entity())
     }
 
-    async fn get_tierlist_of_user(&self, user_id: &str) -> Result<Vec<TierlistEntity>, ApiError> {
+    async fn get_tierlist_of_user(&self, user_id: &str, can_see_private_tierlists: bool) -> Result<Vec<TierlistEntity>, ApiError> {
         let user_object_id = ObjectId::parse_str(user_id)
             .map_err(|err| ApiError::BadRequest(err.to_string()))?;
 
-        let query = doc! { "author": user_object_id };
+        let mut query = doc! { "author": user_object_id };
+        if ! can_see_private_tierlists {
+            query = doc! { "author": user_object_id, "is_public": true };
+        }
+
         let cursor = self.collection.find(query)
             .await
             .map_err(|e| ApiError::InternalError(format!("Failed to execute query: {e}")))?;

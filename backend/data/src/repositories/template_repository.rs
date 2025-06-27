@@ -25,11 +25,21 @@ impl TemplateRepository {
 #[async_trait]
 impl AbstractTemplateRepository for TemplateRepository {
     
-    async fn get_template_by_id(&self, id: &str) -> Result<TemplateEntity, ApiError> {
+    async fn get_template_by_id(&self, id: &str, user_id: Option<String>) -> Result<TemplateEntity, ApiError> {
         let id = ObjectId::parse_str(id)
             .map_err(|err| ApiError::BadRequest(err.to_string()))?;
 
         let template = find_template_by_id(&self.collection, id).await?;
+        
+        let template_is_private = ! template.is_public;
+        let user_is_not_author = match &user_id {
+            Some(uid) => template.author.to_string() != *uid,
+            None => true,
+        };
+        
+        if template_is_private && user_is_not_author {
+            return Err(ApiError::Forbidden("You do not have permission to access this template because it is private.".to_string()))
+        }
 
         Ok(template.to_entity())
     }

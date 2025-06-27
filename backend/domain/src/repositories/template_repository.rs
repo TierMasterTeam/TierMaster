@@ -5,7 +5,7 @@ use async_trait::async_trait;
 
 #[async_trait]
 pub trait AbstractTemplateRepository: Send + Sync {
-    async fn get_template_by_id(&self, id: &str) -> Result<TemplateEntity, ApiError>;
+    async fn get_template_by_id(&self, id: &str, user_id: Option<String>) -> Result<TemplateEntity, ApiError>;
     async fn get_template_of_user(&self, user_id: &str, can_see_private_templates: bool) -> Result<Vec<TemplateEntity>, ApiError>;
 
     async fn create_template(&self, template: CreateTemplateEntity) -> Result<String, ApiError>;
