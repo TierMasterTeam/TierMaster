@@ -1,45 +1,91 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useTierListStore } from '../stores/tierListStore'
-import { VueDraggable } from 'vue-draggable-plus'
+import { type SortableEvent, VueDraggable } from 'vue-draggable-plus'
 import ItemCard from '../components/ItemCard.vue'
 import Button from './base/Button.vue'
-import { io } from 'socket.io-client'
+import { useTierlistRoomStore } from '@stores/tierlistRoomStore.ts'
+import RoomUserAvatar from '@components/RoomUserAvatar.vue'
+import type { RoomCard } from '@interfaces/RoomTierlist.ts'
+
+const CARDS_BANK_ID = 'cards_bank'
 
 const tierListStore = useTierListStore()
+const roomStore = useTierlistRoomStore()
+
 const isDragging = ref(false)
 
 const tierlistId = '6825d706c37c360531013170' // tierListStore.currentTierlist?.id
 
-const socket = io(`${import.meta.env.VITE_API_URL}/ws`, { reconnectionDelayMax: 10000 }).connect()
-socket.on('tierlist', (updatedTierlist) => {
-  tierListStore.currentTierlist = updatedTierlist
-})
+roomStore.join(tierlistId)
 
-socket.emit('join', tierlistId)
+const getCardFromEvent = (event: SortableEvent, index: number) => {
+  if (
+    (event.to && event.to.id === CARDS_BANK_ID) ||
+    (!event.to && event.from.id === CARDS_BANK_ID)
+  ) {
+    return roomStore.tierlist!.cards[index]
+  }
+
+  const gradeId = event.to?.id || event.from.id
+  const gradeIndex = parseGradeIndexFromGradeId(gradeId)
+  return roomStore.tierlist!.grades[gradeIndex].cards[index]
+}
+
+const updateCardDragState = (card: RoomCard, isDragged: boolean) => {
+  card.isDragged = isDragged
+  card.draggedBy = isDragged ? roomStore.roomUser! : undefined
+}
+
+const onChoose = (event: SortableEvent) => {
+  const card = getCardFromEvent(event, event.oldIndex!)
+  updateCardDragState(card, true)
+  roomStore.updateTierlist(roomStore.tierlist!)
+}
+
+const onUnchoose = (event: SortableEvent) => {
+  if (event.from !== event.to) return // skip if dropped elsewhere (handled in onDragEnd)
+
+  const card = getCardFromEvent(event, event.oldIndex!)
+  updateCardDragState(card, false)
+  roomStore.updateTierlist(roomStore.tierlist!)
+}
 
 const onDragStart = () => {
   isDragging.value = true
 }
 
-const onDragEnd = () => {
+function parseGradeIndexFromGradeId(id: string) {
+  const gradeIdElements = id.split('_')
+  return parseInt(gradeIdElements[gradeIdElements.length - 1])
+}
+
+const onDragEnd = (event: SortableEvent) => {
   isDragging.value = false
-  socket.emit('update', tierListStore.currentTierlist)
+
+  if (!event.to?.id) return
+
+  const card = getCardFromEvent(event, event.newIndex!)
+  updateCardDragState(card, false)
+  roomStore.updateTierlist(roomStore.tierlist!)
 }
 </script>
 
 <template>
-  <div class="container mx-auto p-4" v-if="tierListStore.currentTierlist">
-    <h1
-      v-if="tierListStore.currentTierlist.name"
-      class="text-4xl font-bold text-[#31E7C3] pb-4 font-jersey"
-    >
-      {{ tierListStore.currentTierlist.name }} :
+  <div class="container mx-auto p-4" v-if="roomStore.tierlist">
+    <div class="flex justify-end gap-2 p-2">
+      <div v-for="user in roomStore.users" :key="user.id">
+        <RoomUserAvatar :user="user" size="large" />
+      </div>
+    </div>
+
+    <h1 v-if="roomStore.tierlist.name" class="text-4xl font-bold text-[#31E7C3] pb-4 font-jersey">
+      {{ roomStore.tierlist.name }} :
     </h1>
 
     <div class="grid gap-4">
       <div
-        v-for="grade in tierListStore.currentTierlist.grades"
+        v-for="(grade, index) in roomStore.tierlist.grades"
         :key="grade.name"
         class="p-3 rounded-3xl shadow-md flex gap-2 border-2"
       >
@@ -51,26 +97,30 @@ const onDragEnd = () => {
         </div>
         <VueDraggable
           v-model="grade.cards"
-          item-key="name"
+          :id="`grade_${grade.name}_${index}`"
           group="grades"
           class="flex-1 flex flex-wrap gap-2 rounded-md items-center"
           :on-start="onDragStart"
           :on-end="onDragEnd"
+          :onChoose="onChoose"
+          :onUnchoose="onUnchoose"
         >
           <div v-for="card in grade.cards" :key="card.name" class="w-19 h-19">
-            <ItemCard :card="card" :grade="grade" :is-dragging="isDragging" />
+            <ItemCard :card="card" :is-dragging="isDragging" />
           </div>
         </VueDraggable>
       </div>
       <VueDraggable
-        v-model="tierListStore.currentTierlist.cards"
-        item-key="name"
+        v-model="roomStore.tierlist.cards"
+        :id="CARDS_BANK_ID"
         group="grades"
         class="flex-1 flex flex-wrap gap-2 rounded-md items-center"
         :on-start="onDragStart"
         :on-end="onDragEnd"
+        :onChoose="onChoose"
+        :onUnchoose="onUnchoose"
       >
-        <div v-for="card in tierListStore.currentTierlist.cards" :key="card.name" class="w-19 h-19">
+        <div v-for="card in roomStore.tierlist.cards" :key="card.name" class="w-19 h-19">
           <ItemCard :card="card" :is-dragging="isDragging" />
         </div>
       </VueDraggable>
@@ -84,6 +134,9 @@ const onDragEnd = () => {
     >
       Save Tierlist
     </Button>
+  </div>
+  <div class="flex flex-1 items-center justify-center w-full p-4" v-else-if="roomStore.connecting">
+    <p class="text-center text-2xl"></p>
   </div>
 </template>
 

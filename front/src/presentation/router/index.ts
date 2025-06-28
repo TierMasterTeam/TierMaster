@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import NavBarLayout from '../layouts/NavBarLayout.vue'
-import TierListView from '../views/TierListView.vue'
 import { useAuthStore } from '@stores/authStore'
 import HomeView from '../views/HomeView.vue'
 
@@ -11,9 +10,7 @@ const router = createRouter({
     {
       path: '/',
       component: NavBarLayout,
-      children: [
-        { path: '', name: 'home', component: HomeView },
-      ],
+      children: [{ path: '', name: 'home', component: HomeView }],
     },
     // Protected routes
     {
@@ -21,7 +18,11 @@ const router = createRouter({
       component: NavBarLayout,
       meta: { requiresAuth: true },
       children: [
-        { path: '', name: 'myTemplates', component: () => import('../views/TierListTemplatesView.vue') },
+        {
+          path: '',
+          name: 'myTemplates',
+          component: () => import('../views/TierListTemplatesView.vue'),
+        },
       ],
     },
     {
@@ -33,10 +34,22 @@ const router = createRouter({
       ],
     },
     {
+      path: '/tierlist/:id',
+      component: NavBarLayout,
+      meta: { requiresAuth: false },
+      children: [
+        { path: '', name: 'tierlist', component: () => import('../views/TierListView.vue') },
+      ],
+    },
+    {
       path: '/privacy-policy',
       component: NavBarLayout,
       children: [
-        { path: '', name: 'privacyPolicy', component: () => import('../views/PrivacyPolicyView.vue') },
+        {
+          path: '',
+          name: 'privacyPolicy',
+          component: () => import('../views/PrivacyPolicyView.vue'),
+        },
       ],
     },
     {

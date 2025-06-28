@@ -1,51 +1,51 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { mount, VueWrapper } from '@vue/test-utils';
-import ItemCard from '../ItemCard.vue';
-import type { ComponentPublicInstance } from 'vue';
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { mount, VueWrapper } from '@vue/test-utils'
+import ItemCard from '../ItemCard.vue'
+import type { ComponentPublicInstance } from 'vue'
+import { createTestingPinia } from '@pinia/testing'
+import { useTierlistRoomStore } from '@stores/tierlistRoomStore.ts'
 
 describe('ItemCard.vue', () => {
   const mockItem = {
-    id: '1',
     name: 'Test Item',
-    image: 'test-image.jpg'
-  };
+    image: 'test-image.jpg',
+    isDragged: false,
+    draggedBy: undefined,
+  }
 
-  const mockTier = {
-    id: '1',
-    name: 'S',
-    color: '#FF0000',
-    cards: []
-  };
-
-  let wrapper: VueWrapper<ComponentPublicInstance>;
+  let wrapper: VueWrapper<ComponentPublicInstance>
 
   beforeEach(() => {
     wrapper = mount(ItemCard, {
+      global: {
+        plugins: [createTestingPinia({ createSpy: vi.fn })],
+      },
       props: {
         item: mockItem,
         card: mockItem,
         index: 0,
         isDragging: false,
         isDraggedItem: false,
-        isDropTarget: false
-      }
-    });
-  });
+        isDropTarget: false,
+      },
+    })
+
+    useTierlistRoomStore()
+  })
 
   it('renders correctly', () => {
-    expect(wrapper.exists()).toBe(true);
-    expect(wrapper.attributes('style')).toContain(`background-image: url(${mockItem.image})`);
-  });
+    expect(wrapper.exists()).toBe(true)
+    expect(wrapper.attributes('style')).toContain(`background-image: url(${mockItem.image})`)
+  })
 
   it('shows name bubble on click', async () => {
-    expect(wrapper.find('.name-bubble').exists()).toBe(false);
+    expect(wrapper.find('.name-bubble').exists()).toBe(false)
 
-    await wrapper.trigger('click');
-    expect(wrapper.find('.name-bubble').exists()).toBe(true);
-    expect(wrapper.find('.name-bubble').text()).toBe(mockItem.name);
+    await wrapper.trigger('click')
+    expect(wrapper.find('.name-bubble').exists()).toBe(true)
+    expect(wrapper.find('.name-bubble').text()).toBe(mockItem.name)
 
     // Reset mocks and timers after test
-    vi.useRealTimers();
-  });
-
-});
+    vi.useRealTimers()
+  })
+})

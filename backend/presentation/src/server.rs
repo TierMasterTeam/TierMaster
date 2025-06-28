@@ -49,7 +49,7 @@ fn websockets(app_state: AppState) -> SocketIoLayer {
         .build_layer();
 
     io.ns("/api/ws", WebsocketController::on_connect);
-
+    
     websocket_layer
 }
 
