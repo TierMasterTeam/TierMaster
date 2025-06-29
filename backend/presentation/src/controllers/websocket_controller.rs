@@ -174,7 +174,9 @@ fn register_events(socket: SocketRef, room_user: RoomUserPresenter) {
 
 /// create a new room for a tierlist with id 'room_id'
 async fn init_room(room_id: &str, room_user: RoomUserPresenter, app_state: AppState) -> Result<RoomEntity, ApiError> {
-    let tierlist = app_state.services().tierlist().get_tierlist_by_id(room_id, None)
+    let tierlist = app_state.services()
+        .tierlist()
+        .get_tierlist_by_id(room_id, Some(room_user.clone().id))
         .await?;
 
     let tierlist_room = RoomEntity {
