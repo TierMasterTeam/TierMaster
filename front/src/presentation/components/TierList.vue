@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useTierListStore } from '../stores/tierListStore'
 import { type SortableEvent, VueDraggable } from 'vue-draggable-plus'
 import ItemCard from '../components/ItemCard.vue'
@@ -7,17 +7,40 @@ import Button from './base/Button.vue'
 import { useTierlistRoomStore } from '@stores/tierlistRoomStore.ts'
 import RoomUserAvatar from '@components/RoomUserAvatar.vue'
 import type { RoomCard } from '@interfaces/RoomTierlist.ts'
+import { useRoute, useRouter } from 'vue-router'
+import { useUtilsStore } from '../stores/utilsStore'
+import { useAuthStore } from '../stores/authStore'
+
+const showToast = useUtilsStore().showToast
 
 const CARDS_BANK_ID = 'cards_bank'
 
-const tierListStore = useTierListStore()
+const router = useRouter()
+
 const roomStore = useTierlistRoomStore()
+
+const tierlistStore = useTierListStore()
 
 const isDragging = ref(false)
 
-const tierlistId = '6825d706c37c360531013170' // tierListStore.currentTierlist?.id
+const authStore = useAuthStore()
 
-roomStore.join(tierlistId)
+
+const route = useRoute()
+const tierlistId = route.params.id as string || ''
+
+onMounted(() => {
+
+  console.log( "auth store " ,authStore.user)
+  if (!tierlistId) {
+    console.error('Tierlist ID is required to join the room')
+    showToast('Tierlist ID is required to join the room', 'error', 2000)
+    router.push({ name: 'home' })
+    return
+  }
+  console.log('Joining tierlist room with ID:', tierlistId)
+  roomStore.join(tierlistId)
+})
 
 const getCardFromEvent = (event: SortableEvent, index: number) => {
   if (

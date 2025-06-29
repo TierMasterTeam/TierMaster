@@ -40,7 +40,7 @@ const createTierlistByTemplate = async(template: Template) => {
 
   if (res) {
     router.push({
-      name: 'myTierlists',
+      name: 'tierlist',
       params: { id: res.id }
     });
   } else {
