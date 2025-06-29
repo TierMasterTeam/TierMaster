@@ -10,6 +10,7 @@ mod template_presenter;
 mod create_template_presenter;
 mod update_template_presenter;
 mod template_grade_presenter;
+mod room_presenter;
 
 pub use create_tierlist_presenter::CreateTierlistPresenter;
 pub use tierlist_presenter::TierlistPresenter;
@@ -28,3 +29,5 @@ pub use user_presenter::UserPresenter;
 pub use credentials_presenter::CredentialsPresenter;
 
 pub use search_query_presenter::SearchQueryPresenter;
+
+pub use room_presenter::*;

@@ -11,6 +11,7 @@ mod create_template_entity;
 mod template_entity;
 mod update_template_entity;
 mod template_grade_entity;
+mod room_entity;
 
 pub use card_entity::CardEntity;
 pub use create_template_entity::CreateTemplateEntity;
@@ -25,3 +26,5 @@ pub use tierlist_entity::TierlistEntity;
 pub use update_template_entity::UpdateTemplateEntity;
 pub use update_tierlist_entity::UpdateTierlistEntity;
 pub use user_entity::UserEntity;
+
+pub use room_entity::*;

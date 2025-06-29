@@ -3,7 +3,5 @@ import Tierlist from '@components/TierList.vue'
 </script>
 
 <template>
-  <main>
-    <Tierlist />
-  </main>
+  <Tierlist />
 </template>
