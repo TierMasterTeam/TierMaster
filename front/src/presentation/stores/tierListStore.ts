@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { TierList } from '@/domain/interfaces/TierList'
+import type { Template, TierList } from '@/domain/interfaces/TierList'
 import api from '@/infra/http/apiClient'
 import { useUtilsStore } from '@/presentation/stores/utilsStore'
 import { useAuthStore } from './authStore'
@@ -40,7 +40,7 @@ export const useTierListStore = defineStore('tierList', () => {
   }
 
   const initTemplate = async () => {
-    const template: TierList = {
+    const template: Template = {
       name: '',
       author: authStore.user?.id || '',
       is_public: false,
@@ -50,27 +50,22 @@ export const useTierListStore = defineStore('tierList', () => {
         {
           name: 'S',
           color: '#F55B5B',
-          cards: [],
         },
         {
           name: 'A',
           color: '#FF8652',
-          cards: [],
         },
         {
           name: 'B',
           color: '#FBAE56',
-          cards: [],
         },
         {
           name: 'C',
           color: '#FFE553',
-          cards: [],
         },
         {
           name: 'D',
           color: '#64EDD2',
-          cards: [],
         },
       ],
 
@@ -84,6 +79,33 @@ export const useTierListStore = defineStore('tierList', () => {
       return data.id
     } catch (error) {
       showToast('Failed to create template', 'error', 2000)
+    }
+  }
+
+  const createTierList = async (template: Template, authorId: string) => {
+    try {
+      const tierList: TierList = {
+        name: template.name,
+        author: authorId,
+        imgCover: template.imgCover,
+        is_public: false,
+        tags: template.tags,
+        cards: template.cards,
+        grades: template.grades.map(grade => ({
+          name: grade.name,
+          color: grade.color,
+          cards: [],
+        })),
+      }
+      const response = await api.post('tierlist', {
+        json: tierList,
+      })
+      const data = await response.json()
+      return data as { id: string }
+    } catch (error) {
+      console.error('Erreur dans createTierList:', error)
+      showToast('Failed to create tier list', 'error', 2000)
+      return null
     }
   }
 
@@ -120,9 +142,9 @@ export const useTierListStore = defineStore('tierList', () => {
 
   const getPublicTemplates = async () => {
     try {
-      const response = await api.get('tierlist')
-      const data = (await response.json()) as TierList[]
-      return data
+      const response = await api.get('template/search?query=Program&page=1&per-page=1')
+      const data = (await response.json()) as {page: number, per_page: number, data: Template[]}
+      return data.data
     } catch (error) {
       console.error('Error fetching public templates:', error)
       showToast('Failed to fetch public templates', 'error', 2000)
@@ -139,5 +161,6 @@ export const useTierListStore = defineStore('tierList', () => {
     updateTemplate,
     uploadImages,
     getPublicTemplates,
+    createTierList,
   }
 })

@@ -4,7 +4,7 @@ import { LayoutPanelTop, Search } from 'lucide-vue-next';
 import Button from '../components/base/Button.vue';
 import { onMounted, ref, computed } from 'vue';
 import { useTierListStore } from '../stores/tierListStore';
-import type { TierList } from '@/domain/interfaces/TierList';
+import type { Template, TierList } from '@/domain/interfaces/TierList';
 import TemplateCard from '../components/TemplateCard.vue';
 import TemplateCarousel from '../components/TemplateCarousel.vue';
 import { useRouter } from 'vue-router';
@@ -13,7 +13,7 @@ import { useAuthStore } from '../stores/authStore';
 const router = useRouter();
 
 const authStore = useAuthStore();
-const templates = ref<TierList[]>([]);
+const templates = ref<Template[]>([]);
 const searchQuery = ref('');
 
 const tierListStore = useTierListStore();
@@ -56,7 +56,7 @@ const createTempateAction = async() => {
 
 </script>
 <template>
-  <div class="flex flex-col px-4 items-center">
+  <div class="flex flex-col px-4 items-center w-full">
     <div class="w-fit flex flex-col">
       <h1 class="font-jersey pt-16 text-6xl md:text-[80px] tracking-widest text-light-green-custom">TierMaster</h1>
       <div class="flex flex-col md:flex-row w-full justify-between gap-4">

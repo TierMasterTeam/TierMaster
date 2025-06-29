@@ -41,6 +41,13 @@ const useLogout = () => {
             :class="{ 'nav-link-active': route.name === 'myTemplates' }"
           >{{ $t('nav.myTemplates') }}</router-link>
         </li>
+        <li>
+          <router-link
+            :to="{name: 'myTierlists'}"
+            class="nav-link"
+            :class="{ 'nav-link-active': route.name === 'myTierlists' }"
+          >{{ $t('nav.myTierlists') }}</router-link>
+        </li>
       </ul>
     </div>
     <div class="flex items-center gap-4">

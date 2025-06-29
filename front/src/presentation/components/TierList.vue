@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useTierListStore } from '../stores/tierListStore'
 import { type SortableEvent, VueDraggable } from 'vue-draggable-plus'
 import ItemCard from '../components/ItemCard.vue'
@@ -7,17 +7,33 @@ import Button from './base/Button.vue'
 import { useTierlistRoomStore } from '@stores/tierlistRoomStore.ts'
 import RoomUserAvatar from '@components/RoomUserAvatar.vue'
 import type { RoomCard } from '@interfaces/RoomTierlist.ts'
+import { useRoute, useRouter } from 'vue-router'
+import { useUtilsStore } from '../stores/utilsStore'
+import { useAuthStore } from '../stores/authStore'
+
+const showToast = useUtilsStore().showToast
 
 const CARDS_BANK_ID = 'cards_bank'
 
-const tierListStore = useTierListStore()
+const router = useRouter()
+
 const roomStore = useTierlistRoomStore()
 
 const isDragging = ref(false)
 
-const tierlistId = '6825d706c37c360531013170' // tierListStore.currentTierlist?.id
+const route = useRoute()
+const tierlistId = route.params.id as string || ''
 
-roomStore.join(tierlistId)
+onMounted(() => {
+  if (!tierlistId) {
+    console.error('Tierlist ID is required to join the room')
+    showToast('Tierlist ID is required to join the room', 'error', 2000)
+    router.push({ name: 'home' })
+    return
+  }
+  console.log('Joining tierlist room with ID:', tierlistId)
+  roomStore.join(tierlistId)
+})
 
 const getCardFromEvent = (event: SortableEvent, index: number) => {
   if (
@@ -72,7 +88,7 @@ const onDragEnd = (event: SortableEvent) => {
 </script>
 
 <template>
-  <div class="container mx-auto p-4" v-if="roomStore.tierlist">
+  <div class="container mx-auto p-4 pb-8" v-if="roomStore.tierlist">
     <div class="flex justify-end gap-2 p-2">
       <div v-for="user in roomStore.users" :key="user.id">
         <RoomUserAvatar :user="user" size="large" />
@@ -125,15 +141,7 @@ const onDragEnd = (event: SortableEvent) => {
         </div>
       </VueDraggable>
     </div>
-    <Button
-      type="button"
-      variant="primary"
-      size="md"
-      class="mt-4"
-      @click="tierListStore.saveTierList"
-    >
-      Save Tierlist
-    </Button>
+
   </div>
   <div class="flex flex-1 items-center justify-center w-full p-4" v-else-if="roomStore.connecting">
     <p class="text-center text-2xl"></p>
