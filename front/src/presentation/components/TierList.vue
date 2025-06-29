@@ -19,19 +19,12 @@ const router = useRouter()
 
 const roomStore = useTierlistRoomStore()
 
-const tierlistStore = useTierListStore()
-
 const isDragging = ref(false)
-
-const authStore = useAuthStore()
-
 
 const route = useRoute()
 const tierlistId = route.params.id as string || ''
 
 onMounted(() => {
-
-  console.log( "auth store " ,authStore.user)
   if (!tierlistId) {
     console.error('Tierlist ID is required to join the room')
     showToast('Tierlist ID is required to join the room', 'error', 2000)
