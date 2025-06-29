@@ -57,7 +57,7 @@ impl WebsocketController {
 
 /// create a new room for a tierlist with id 'room_id'
 async fn init_room(room_id: &str, app_state: AppState) -> Result<TierlistEntity, ApiError> {
-    let tierlist = app_state.services().tierlist().get_tierlist_by_id(room_id)
+    let tierlist = app_state.services().tierlist().get_tierlist_by_id(room_id, None)
         .await?;
     
     app_state.services().websocket().create(room_id, tierlist.clone()).await

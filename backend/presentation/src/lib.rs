@@ -4,3 +4,4 @@ pub mod error;
 pub mod server;
 pub mod middlewares;
 pub mod states;
+pub mod types;

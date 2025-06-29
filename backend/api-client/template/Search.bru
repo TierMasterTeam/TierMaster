@@ -1,0 +1,17 @@
+meta {
+  name: Search
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{host}}/template/search?query=Program&page=1&per-page=1
+  body: none
+  auth: inherit
+}
+
+params:query {
+  query: Program
+  page: 1
+  per-page: 1
+}

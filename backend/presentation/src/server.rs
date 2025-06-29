@@ -1,4 +1,4 @@
-use crate::controllers::{AuthController, ImageController, TierlistController, WebsocketController};
+use crate::controllers::{AuthController, ImageController, TemplateController, TierlistController, WebsocketController};
 use application::AppState;
 use axum::http::{header, Method};
 use axum::routing::get;
@@ -62,6 +62,7 @@ fn routes() -> Router<Arc<AppState>> {
         }))
         .merge(AuthController::get_router())
         .merge(TierlistController::get_router())
+        .merge(TemplateController::get_router())
         .merge(ImageController::get_router());
 
     Router::new()
