@@ -15,6 +15,11 @@ export interface Grade {
   cards: Card[];
 }
 
+export interface GradesOnly {
+  name: string;
+  color: string;
+}
+
 export interface Card {
   name: string;
   image: string;
@@ -23,5 +28,16 @@ export interface Card {
 export interface CardUpload {
   name: string;
   image: File;
+}
+
+export interface Template {
+  id?: string;
+  name: string;
+  author: string;
+  imgCover?: string;
+  is_public: boolean;
+  tags: string[];
+  cards: Card[];
+  grades: GradesOnly[];
 }
 

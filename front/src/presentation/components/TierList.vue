@@ -72,7 +72,7 @@ const onDragEnd = (event: SortableEvent) => {
 </script>
 
 <template>
-  <div class="container mx-auto p-4" v-if="roomStore.tierlist">
+  <div class="container mx-auto p-4 pb-8" v-if="roomStore.tierlist">
     <div class="flex justify-end gap-2 p-2">
       <div v-for="user in roomStore.users" :key="user.id">
         <RoomUserAvatar :user="user" size="large" />
@@ -125,15 +125,7 @@ const onDragEnd = (event: SortableEvent) => {
         </div>
       </VueDraggable>
     </div>
-    <Button
-      type="button"
-      variant="primary"
-      size="md"
-      class="mt-4"
-      @click="tierListStore.saveTierList"
-    >
-      Save Tierlist
-    </Button>
+
   </div>
   <div class="flex flex-1 items-center justify-center w-full p-4" v-else-if="roomStore.connecting">
     <p class="text-center text-2xl"></p>

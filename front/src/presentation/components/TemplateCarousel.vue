@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import TemplateCard from './TemplateCard.vue';
-import type { TierList } from '@/domain/interfaces/TierList';
+import type { Template } from '@/domain/interfaces/TierList';
 
-const props = defineProps<{ templates: TierList[] }>();
+const props = defineProps<{ templates: Template[] }>();
 
 const currentIndex = ref(0);
 
