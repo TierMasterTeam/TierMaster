@@ -109,6 +109,18 @@ impl AbstractTemplateRepository for TemplateRepository {
 
         Ok(result)
     }
+    
+    async fn delete_by_id(&self, id: &str) -> Result<(), ApiError> {
+        let template_id = ObjectId::parse_str(id)
+            .map_err(|err| ApiError::BadRequest(err.to_string()))?;
+        
+        let query = doc! { "_id": template_id };
+        self.collection.delete_one(query)
+            .await
+            .map_err(|e| ApiError::InternalError(format!("Failed to execute delete : {e}")))?;
+        
+        Ok(())
+    }
 }
 
 async fn find_template_by_id(collection: &Collection<TemplateModel>, id: ObjectId) -> Result<TemplateModel, ApiError> {

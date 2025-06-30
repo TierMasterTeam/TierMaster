@@ -12,4 +12,6 @@ pub trait AbstractTemplateRepository: Send + Sync {
 
     async fn update_template_by_id(&self, id: &str, template: UpdateTemplateEntity) -> Result<(), ApiError>;
     async fn search(&self, search_title: &str, search_tags: Vec<&str>, pagination: Pagination) -> Result<Vec<TemplateEntity>, ApiError>;
+
+    async fn delete_by_id(&self, id: &str) -> Result<(), ApiError>;
 }

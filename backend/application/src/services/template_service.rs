@@ -32,6 +32,10 @@ impl TemplateService {
         let (title, tags) = extract_title_and_tags_from_search_text(search_text);
         self.repo.search(title, tags, pagination).await
     }
+    
+    pub async fn delete_by_id(&self, id: &str) -> Result<(), ApiError> {
+        self.repo.delete_by_id(id).await
+    }
 }
 
 
