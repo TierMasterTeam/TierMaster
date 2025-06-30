@@ -7,7 +7,7 @@ import ImagePreviewInput from '../components/base/ImagePreviewInput.vue';
 import { VueDraggable } from 'vue-draggable-plus';
 import GradeInput from './GradeInput.vue';
 import { useTierListStore } from '../stores/tierListStore';
-import type { Card, TierList } from '@/domain/interfaces/TierList';
+import type { Card, Template, TierList } from '@/domain/interfaces/TierList';
 import { useAuthStore } from '../stores/authStore';
 import { useRoute } from 'vue-router';
 import { useUtilsStore } from '../stores/utilsStore';
@@ -21,7 +21,7 @@ const authStore = useAuthStore();
 const user = authStore.user;
 const route = useRoute();
 
-const template = ref<TierList | undefined>(undefined);
+const template = ref<Template | undefined>(undefined);
 const currentCategory = ref<string>('');
 const imageUploadRef = ref();
 const showNameBubbles = ref<boolean[]>([]);
@@ -32,7 +32,7 @@ onMounted(async () => {
   const id = route.params.id;
   if (id) {
     try {
-      template.value = await tierListStore.getTierListById(id as string);
+      template.value = await tierListStore.getTemplateById(id as string);
     } catch (error) {
       console.error('Error fetching tier list:', error);
     }
@@ -106,7 +106,6 @@ const addGrade = () => {
   template.value!.grades.push({
     name: 'New',
     color: '#CCCCCC',
-    cards: [],
   });
 };
 

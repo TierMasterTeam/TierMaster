@@ -41,3 +41,9 @@ export interface Template {
   grades: GradesOnly[];
 }
 
+export interface SearchResult {
+  page: number;
+  per_page: number;
+  data: Template[];
+}
+

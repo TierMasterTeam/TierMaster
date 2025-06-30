@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { Template, TierList } from '@/domain/interfaces/TierList'
+import type { SearchResult, Template, TierList } from '@/domain/interfaces/TierList'
 import api from '@/infra/http/apiClient'
 import { useUtilsStore } from '@/presentation/stores/utilsStore'
 import { useAuthStore } from './authStore'
@@ -21,9 +21,14 @@ export const useTierListStore = defineStore('tierList', () => {
     return data
   }
 
+  const getTemplateById = async (id: string) => {
+    const response = await api.get(`template/${id}`)
+    const data = (await response.json()) as Template
+    return data
+  }
   const getUserTemplates = async (userId: string) => {
-    const response = await api.get(`tierlist/user/${userId}`)
-    const data = (await response.json()) as TierList[]
+    const response = await api.get(`template/user/${userId}`)
+    const data = (await response.json()) as Template[]
     return data
   }
 
@@ -71,7 +76,7 @@ export const useTierListStore = defineStore('tierList', () => {
 
     }
     try {
-      const response = await api.post('tierlist', {
+      const response = await api.post('template', {
         json: template,
       })
       const data = (await response.json()) as { id: string }
@@ -109,13 +114,13 @@ export const useTierListStore = defineStore('tierList', () => {
     }
   }
 
-  const updateTemplate = async (template: TierList) => {
+  const updateTemplate = async (template: Template) => {
     try {
       if (!template.id) {
         return
       }
 
-      await api.put(`tierlist/${template.id}`, {
+      await api.put(`template/${template.id}`, {
         json: template,
       })
     } catch (error) {
@@ -142,13 +147,35 @@ export const useTierListStore = defineStore('tierList', () => {
 
   const getPublicTemplates = async () => {
     try {
-      const response = await api.get('template/search?query=Program&page=1&per-page=1')
+      const response = await api.get('template/search?query=&page=1&per-page=20')
       const data = (await response.json()) as {page: number, per_page: number, data: Template[]}
       return data.data
     } catch (error) {
       console.error('Error fetching public templates:', error)
       showToast('Failed to fetch public templates', 'error', 2000)
       return []
+    }
+  }
+
+  const deleteTemplate = async (templateId: string) => {
+    try {
+      await api.delete(`template/${templateId}`)
+      showToast('Template deleted successfully', 'success', 2000)
+    } catch (error) {
+      console.error('Error deleting template:', error)
+      showToast('Failed to delete template', 'error', 2000)
+    }
+  }
+
+  const searchTemplates = async (query: string, page: number = 1, perPage: number = 20) => {
+    try {
+      const response = await api.get(`template/search?query=${encodeURIComponent(query)}&page=${page}&per-page=${perPage}`)
+      const data = (await response.json()) as SearchResult
+      return data
+    } catch (error) {
+      console.error('Error searching templates:', error)
+      showToast('Failed to search templates', 'error', 2000)
+      return { page: 1, per_page: perPage, data: [] }
     }
   }
 
@@ -161,6 +188,9 @@ export const useTierListStore = defineStore('tierList', () => {
     updateTemplate,
     uploadImages,
     getPublicTemplates,
+    searchTemplates,
     createTierList,
+    getTemplateById,
+    deleteTemplate,
   }
 })
