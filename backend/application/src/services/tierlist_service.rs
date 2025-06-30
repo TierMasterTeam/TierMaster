@@ -29,4 +29,8 @@ impl TierlistService {
     pub async fn update_tierlist_by_id(&self, id: &str, tierlist: UpdateTierlistEntity) -> Result<(), ApiError>  {
         self.repo.update_tierlist_by_id(id, tierlist).await
     }
+    
+    pub async fn delete_by_id(&self, id: &str) -> Result<(), ApiError> {
+        self.repo.delete_by_id(id).await
+    }
 }
