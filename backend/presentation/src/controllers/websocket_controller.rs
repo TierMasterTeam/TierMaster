@@ -19,7 +19,7 @@ use std::hash::{DefaultHasher, Hash, Hasher};
 pub struct WebsocketController;
 
 impl WebsocketController {
-    pub async fn on_connect(io: SocketIo, socket: SocketRef, state: State<AppState>) {
+    pub async fn on_connect(socket: SocketRef, state: State<AppState>) {
         info!("Socket connected: {}", socket.id);
 
         let auth_session = extract_auth_session(&mut socket.req_parts().clone(), &state).await;

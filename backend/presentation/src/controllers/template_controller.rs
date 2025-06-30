@@ -6,9 +6,10 @@ use application::AppState;
 use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
-use axum::routing::{get, post, put};
+use axum::routing::{delete, get, post, put};
 use axum::{Json, Router};
 use axum_extra::json;
+use domain::error::ApiError;
 use domain::mappers::EntityMapper;
 use domain::types::Pagination;
 use std::sync::Arc;
@@ -21,6 +22,7 @@ impl TemplateController {
             .route("/", post(create_template))
             .route("/{id}", get(get_template_by_id))
             .route("/{id}", put(update_template_by_id))
+            .route("/{id}", delete(delete_by_id))
             .route("/user/{id}", get(get_templates_of_user))
             .route("/search", get(search_template));
 
@@ -125,4 +127,28 @@ async fn search_template(
     };
 
     Ok(Json(response))
+}
+
+async fn delete_by_id(
+    auth: AuthSession,
+    Path(id): Path<String>,
+    State(state): State<Arc<AppState>>
+) -> Result<(), ApiErrorResponse> {
+
+    let template = state.services
+        .template()
+        .get_template_by_id(id.as_str(), Some(auth.user_id.clone()))
+        .await?;
+
+    if template.author.ne(&auth.user_id.clone()) {
+        let error = ApiError::Forbidden("You do not have permissions to delete this template".to_string());
+        return Err(ApiErrorResponse::from(error));
+    }
+
+    state.services
+        .template()
+        .delete_by_id(id.as_str())
+        .await?;
+
+    Ok(())
 }
