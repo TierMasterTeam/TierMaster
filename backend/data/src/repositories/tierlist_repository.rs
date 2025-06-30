@@ -104,6 +104,19 @@ impl AbstractTierlistRepository for TierlistRepository {
 
         Ok(())
     }
+
+    async fn delete_by_id(&self, id: &str) -> Result<(), ApiError> {
+        let tierlist_id = ObjectId::parse_str(id)
+            .map_err(|err| ApiError::BadRequest(err.to_string()))?;
+
+        let query = doc! { "_id": tierlist_id };
+
+        self.collection.delete_one(query)
+            .await
+            .map_err(|e| ApiError::InternalError(format!("Failed to execute delete : {e}")))?;
+        
+        Ok(())
+    }
 }
 
 async fn find_tierlist_by_id(collection: &Collection<TierlistModel>, id: ObjectId) -> Result<TierlistModel, ApiError> {
