@@ -50,7 +50,8 @@ impl AuthService {
         let refresh_token = self.generate_token().await?;
 
         self.redis_service.store_full_session(token.as_str(), refresh_token.as_str(), user_id.as_str()).await?;
-
+        self.redis_service.store_start_session_timestamp(refresh_token.as_str()).await?;
+            
         Ok((token, user))
     }
 
@@ -116,20 +117,20 @@ impl AuthService {
 
     async fn try_to_refresh_session(&self, token: &str) -> Result<(String, String), ApiError> {
         let refresh_token = self.redis_service.fetch_refresh_token_with_token(token).await?;
-
         let user_id = self.redis_service.fetch_user_id(refresh_token.as_str()).await?;
-
-        self.check_use_session_duration_still_valid(refresh_token.as_str()).await?;
+        self.check_user_session_duration_still_valid(refresh_token.as_str()).await?;
 
         let new_token = self.generate_token().await?;
+
         let new_refresh_token = self.generate_token().await?;
-        self.redis_service.store_full_session(new_token.as_str(), new_refresh_token.as_str(), 
+
+        self.redis_service.store_full_session(new_token.as_str(), new_refresh_token.as_str(),
                                               user_id.as_str()).await?;
 
         Ok((new_token, user_id))
     }
 
-    async fn check_use_session_duration_still_valid(&self, refresh_token: &str) -> Result<(), ApiError> {
+    async fn check_user_session_duration_still_valid(&self, refresh_token: &str) -> Result<(), ApiError> {
         self.redis_service.fetch_start_session_timestamp(refresh_token).await?;
         Ok(())
     }

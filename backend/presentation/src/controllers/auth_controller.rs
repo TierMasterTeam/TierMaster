@@ -30,7 +30,7 @@ async fn login(
     State(state): State<Arc<AppState>>,
     Json(credentials): Json<CredentialsPresenter>,
 ) -> Result<impl IntoResponse, ApiErrorResponse> {
-    
+
     let (token, user) = state.services
         .auth()
         .login(credentials.to_entity())
@@ -75,7 +75,7 @@ async fn me(
         .get_by_id(auth_session.user_id.as_str())
         .await?;
 
-    Ok(Json(UserPresenter::from(user)))
+    Ok(make_auth_response(auth_session.token, UserPresenter::from(user)))
 }
 
 fn make_auth_response(token: String, user: UserPresenter) -> Result<impl IntoResponse, ApiErrorResponse> {
