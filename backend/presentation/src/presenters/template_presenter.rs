@@ -2,6 +2,7 @@ use crate::presenters::{CardPresenter, TemplateGradePresenter};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
+use chrono::{DateTime, Utc};
 use domain::entities::TemplateEntity;
 use domain::mappers::EntityMapper;
 use serde::{Deserialize, Serialize};
@@ -9,6 +10,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TemplatePresenter {
     pub id: String,
+    pub created_at: DateTime<Utc>,
     pub name: String,
     pub is_public: bool,
     pub author: String,
@@ -21,6 +23,7 @@ impl EntityMapper<TemplateEntity> for TemplatePresenter {
     fn to_entity(self) -> TemplateEntity {
         TemplateEntity {
             id: self.id,
+            created_at: self.created_at,
             name: self.name,
             is_public: self.is_public,
             author: self.author,
@@ -36,6 +39,7 @@ impl From<TemplateEntity> for TemplatePresenter {
         Self {
             id: value.id,
             name: value.name,
+            created_at: value.created_at,
             is_public: value.is_public,
             author: value.author,
             tags: value.tags,

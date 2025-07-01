@@ -13,3 +13,4 @@ image = {workspace = true}
 serde = {workspace = true}
 # tokio = {workspace = true}
 # webp = { workspace = true }
+chrono = { workspace =  true }

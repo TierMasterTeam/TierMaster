@@ -16,8 +16,10 @@ futures = {workspace = true}
 serde = {workspace = true}
 # tokio = {workspace = true}
 # webp = { workspace = true }
+chrono = { workspace = true }
 
 mongodb = "3.2.3"
+bson = {version = "2.15.0", features = ["chrono-0_4"]}
 redis = "0.31.0"
 aws-config = "1.6.2"
 aws-sdk-s3 = "1.83.0"

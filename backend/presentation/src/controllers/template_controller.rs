@@ -11,8 +11,10 @@ use axum::{Json, Router};
 use axum_extra::json;
 use domain::error::ApiError;
 use domain::mappers::EntityMapper;
-use domain::types::Pagination;
+use domain::types::{Pagination, SortOption};
+use log::info;
 use std::sync::Arc;
+use std::thread::panicking;
 
 pub struct TemplateController;
 
@@ -115,9 +117,17 @@ async fn search_template(
         per_page: params.per_page
     };
 
+    let sort_option = match params.sort_by {
+        None => None,
+        Some(sort_field) => Some(SortOption {
+            field: sort_field,
+            asc: params.sort_asc,
+        })
+    };
+
     let result = state.services()
         .template()
-        .search(params.query.as_str(), pagination.clone())
+        .search(params.query.as_str(), pagination.clone(), sort_option)
         .await?;
 
     let response = PaginatedResponse {

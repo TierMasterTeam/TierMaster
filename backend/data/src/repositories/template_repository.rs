@@ -4,11 +4,15 @@ use domain::entities::{CreateTemplateEntity, TemplateEntity, UpdateTemplateEntit
 use domain::error::ApiError;
 use domain::mappers::TryEntityMapper;
 use domain::repositories::AbstractTemplateRepository;
-use domain::types::Pagination;
+use domain::types::{Pagination, SortOption};
 use futures::StreamExt;
 use mongodb::bson::oid::ObjectId;
 use mongodb::bson::{doc, Document};
 use mongodb::{Collection, Cursor, Database};
+
+static SUPPORTED_SORT_FIELDS: &'static [&str] = &[
+    "created_at",
+];
 
 #[derive(Clone)]
 pub struct TemplateRepository{
@@ -96,12 +100,19 @@ impl AbstractTemplateRepository for TemplateRepository {
         Ok(())
     }
 
-    async fn search(&self, search_title: &str, search_tags: Vec<&str>, pagination: Pagination) -> Result<Vec<TemplateEntity>, ApiError> {
+    async fn search(&self, search_title: &str, search_tags: Vec<&str>, pagination: Pagination, sort_option: Option<SortOption>) -> Result<Vec<TemplateEntity>, ApiError> {
         let query = build_query_for_full_search(search_title, search_tags);
 
-        let cursor = self.collection.find(query)
+        let mut query_builder = self.collection.find(query)
             .skip((pagination.per_page as u64) * (pagination.page - 1))
-            .limit(pagination.per_page as i64)
+            .limit(pagination.per_page as i64);
+
+        let sort = build_sort(sort_option)?;
+        if sort.is_some() {
+            query_builder = query_builder.sort(sort.unwrap());
+        }
+
+        let cursor = query_builder
             .await
             .map_err(|e| ApiError::InternalError(format!("Failed to execute search : {e}")))?;
 
@@ -121,6 +132,23 @@ impl AbstractTemplateRepository for TemplateRepository {
         
         Ok(())
     }
+}
+
+fn build_sort(sort_option: Option<SortOption>) -> Result<Option<Document>, ApiError> {
+    if sort_option.is_none() {
+        return Ok(None);
+    }
+
+    let sort = sort_option.unwrap().clone();
+    let sort_field = sort.field;
+
+    if ! SUPPORTED_SORT_FIELDS.contains(&sort_field.as_str()) {
+        return Err(ApiError::BadRequest(format!("Templates can not be sorted by '{sort_field}'")));
+    }
+
+    Ok(Some(doc! {
+        sort_field: if sort.asc { 1 } else { -1 },
+    }))
 }
 
 async fn find_template_by_id(collection: &Collection<TemplateModel>, id: ObjectId) -> Result<TemplateModel, ApiError> {
@@ -143,6 +171,12 @@ async fn collect_cursor_to_list_of_template_entity(cursor:  Cursor<TemplateModel
 }
 
 fn build_query_for_full_search(title: &str, tags: Vec<&str>) -> Document {
+    if tags.is_empty() && title.is_empty() {
+        return doc! {
+            "is_public": true,
+        }
+    }
+
     if tags.is_empty() {
         return doc! {
             "is_public": true,
