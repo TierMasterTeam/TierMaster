@@ -1,6 +1,7 @@
 export default {
   searchForTemplate: 'Search for a template',
   searchPlaceholder: 'Search...',
+  searching: 'Searching',
   createYourTemplate: 'Create your template',
   popularTemplates: 'Popular Templates',
   whatsNew: "What's New",

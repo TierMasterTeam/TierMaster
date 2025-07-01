@@ -7,12 +7,13 @@ import ImagePreviewInput from '../components/base/ImagePreviewInput.vue';
 import { VueDraggable } from 'vue-draggable-plus';
 import GradeInput from './GradeInput.vue';
 import { useTierListStore } from '../stores/tierListStore';
-import type { Card, TierList } from '@/domain/interfaces/TierList';
+import type { Card, Template, TierList } from '@/domain/interfaces/TierList';
 import { useAuthStore } from '../stores/authStore';
 import { useRoute } from 'vue-router';
 import { useUtilsStore } from '../stores/utilsStore';
 import pp from '../../assets/pp.png'; // Placeholder image import
 import { useI18n } from 'vue-i18n';
+import Switch from './base/Switch.vue';
 
 const { t } = useI18n();
 const showToast = useUtilsStore().showToast;
@@ -21,7 +22,7 @@ const authStore = useAuthStore();
 const user = authStore.user;
 const route = useRoute();
 
-const template = ref<TierList | undefined>(undefined);
+const template = ref<Template | undefined>(undefined);
 const currentCategory = ref<string>('');
 const imageUploadRef = ref();
 const showNameBubbles = ref<boolean[]>([]);
@@ -32,7 +33,7 @@ onMounted(async () => {
   const id = route.params.id;
   if (id) {
     try {
-      template.value = await tierListStore.getTierListById(id as string);
+      template.value = await tierListStore.getTemplateById(id as string);
     } catch (error) {
       console.error('Error fetching tier list:', error);
     }
@@ -106,7 +107,6 @@ const addGrade = () => {
   template.value!.grades.push({
     name: 'New',
     color: '#CCCCCC',
-    cards: [],
   });
 };
 
@@ -124,6 +124,14 @@ const SaveTemplate = async () => {
     console.error('Error updating template:', error);
   }
 };
+
+const onSwitchChange = async(state: boolean) => {
+  if (template.value) {
+    template.value.is_public = !template.value.is_public;
+    await tierListStore.updateTemplate(template.value);
+    showToast(t('editTemplate.visibilityUpdated', { visibility: template.value.is_public ? 'public' : 'private' }), 'success');
+  }
+};
 </script>
 
 
@@ -134,25 +142,15 @@ const SaveTemplate = async () => {
         <label for="templateName">
           <h1 class="text-[40px] font-jersey">{{ $t('editTemplate.title') }}</h1>
         </label>
-        <BaseInput
-          id="templateName"
-          type="text"
-          :placeholder="$t('editTemplate.titlePlaceholder')"
-          class="mb-4 min-w-sm w-1/3 max-w-2xl"
-          v-model="template.name"
-        />
+        <BaseInput id="templateName" type="text" :placeholder="$t('editTemplate.titlePlaceholder')"
+          class="mb-4 min-w-sm w-1/3 max-w-2xl" v-model="template.name" />
 
         <label for="category">
           <h2 class="text-2xl font-jersey">{{ $t('editTemplate.addCategories') }}</h2>
         </label>
         <form class="flex gap-2" @submit.prevent="addCategory">
-          <BaseInput
-            id="category"
-            type="text"
-            :placeholder="$t('editTemplate.categoryPlaceholder')"
-            class="mb-4 max-w-sm block"
-            v-model="currentCategory"
-          />
+          <BaseInput id="category" type="text" :placeholder="$t('editTemplate.categoryPlaceholder')"
+            class="mb-4 max-w-sm block" v-model="currentCategory" />
           <Button variant="secondary" type="submit" size="md" class="mb-4 h-11">
             <template #icon>
               <Plus class="w-5 h-5" />
@@ -165,10 +163,8 @@ const SaveTemplate = async () => {
             <span class="bg-gray-custom rounded-full px-4 py-2 font-normal text-base font-roboto">
               {{ category }}
             </span>
-            <button
-              @click="removeCategory(index)"
-              class="absolute w-6 h-6 rounded-full bg-light-gray-custom -top-2 -right-3 z-1 flex cursor-pointer"
-            >
+            <button @click="removeCategory(index)"
+              class="absolute w-6 h-6 rounded-full bg-light-gray-custom -top-2 -right-3 z-1 flex cursor-pointer">
               <CircleMinus />
             </button>
           </li>
@@ -177,35 +173,20 @@ const SaveTemplate = async () => {
         <div class="flex-col-reverse flex lg:flex-row gap-16">
           <div>
             <ImagePreviewInput ref="imageUploadRef" />
-            <Button
-              variant="primary"
-              type="button"
-              size="md"
-              icon="image-up"
-              @click="triggerAddToPreview"
-              class="mt-4"
-            >
+            <Button variant="primary" type="button" size="md" icon="image-up" @click="triggerAddToPreview" class="mt-4">
               {{ $t('editTemplate.addToTierlist') }}
             </Button>
           </div>
 
           <div class="flex w-full justify-between gap-16">
-            <div
-              v-if="template.cards.length > 0"
-              class="flex flex-wrap border-2 rounded-xl p-4 w-fit h-fit gap-4 max-w-3xl"
-            >
-              <div
-                v-for="(card, idx) in template.cards"
-                :key="idx"
-                class="flex flex-col items-center relative cursor-pointer"
-                @click="showNameBubble(idx)"
-              >
+            <div v-if="template.cards.length > 0"
+              class="flex flex-wrap border-2 rounded-xl p-4 w-fit h-fit gap-4 max-w-3xl">
+              <div v-for="(card, idx) in template.cards" :key="idx"
+                class="flex flex-col items-center relative cursor-pointer" @click="showNameBubble(idx)">
                 <img :src="card.image" :alt="card.name" class="w-19 h-19 object-cover rounded-md" />
-                <button
-                  @click.stop="removePreviewImage(idx)"
+                <button @click.stop="removePreviewImage(idx)"
                   class="absolute w-6 h-6 rounded-full bg-light-gray-custom -top-2 -right-3 z-10 flex items-center justify-center cursor-pointer border-none"
-                  :aria-label="$t('editTemplate.removeImage')"
-                >
+                  :aria-label="$t('editTemplate.removeImage')">
                   <CircleMinus />
                 </button>
                 <div v-if="showNameBubbles[idx]" class="name-bubble">
@@ -222,8 +203,10 @@ const SaveTemplate = async () => {
         <div class="absolute top-0 left-0 w-full md:relative">
           <label for="coverImageInput" class="w-full md:w-100 h-50 block mb-12">
             <h3 class="hidden md:block text-2xl font-jersey">{{ $t('editTemplate.cover') }}</h3>
-            <img v-if="coverImgUrl" :src="coverImgUrl" :alt="$t('editTemplate.coverAlt')" class="w-full h-full object-cover md:rounded-md md:border-white-custom md:border-2" />
-            <div v-else class="w-full h-full flex items-center justify-center bg-light-gray-custom md:rounded-md mb-4 md:border-white-custom md:border-2 text-gray-500">
+            <img v-if="coverImgUrl" :src="coverImgUrl" :alt="$t('editTemplate.coverAlt')"
+              class="w-full h-full object-cover md:rounded-md md:border-white-custom md:border-2" />
+            <div v-else
+              class="w-full h-full flex items-center justify-center bg-light-gray-custom md:rounded-md mb-4 md:border-white-custom md:border-2 text-gray-500">
               {{ $t('editTemplate.noCover') }}
             </div>
           </label>
@@ -238,28 +221,23 @@ const SaveTemplate = async () => {
             </template>
           </Button>
         </div>
-        <div class="flex flex-col items-center justify-center w-fit h-fit border-2 border-white-custom rounded-xl p-4 mt-2">
-          <VueDraggable v-model="template.grades" item-key="id" group="grades" class="flex-1 flex flex-col gap-2 rounded-md items-center">
-            <GradeInput
-              v-for="(grade, idx) in template.grades"
-              :key="idx"
-              v-model="grade.name"
-              :color="grade.color"
-              @update:color="val => grade.color = val"
-              @delete="template.grades.splice(idx, 1)"
-            />
+        <div
+          class="flex flex-col items-center justify-center w-fit h-fit border-2 border-white-custom rounded-xl p-4 mt-2">
+          <VueDraggable v-model="template.grades" item-key="id" group="grades"
+            class="flex-1 flex flex-col gap-2 rounded-md items-center">
+            <GradeInput v-for="(grade, idx) in template.grades" :key="idx" v-model="grade.name" :color="grade.color"
+              @update:color="val => grade.color = val" @delete="template.grades.splice(idx, 1)" />
           </VueDraggable>
         </div>
       </div>
     </div>
 
-    <div class="flex pt-16">
-      <Button variant="secondary" type="button" size="lg" class="mt-4" @click="SaveTemplate()">
+    <div class="flex pt-16 gap-8 items-center ">
+      <Button variant="primary" type="button" size="lg" @click="SaveTemplate()">
         {{ $t('editTemplate.save') }}
       </Button>
-      <Button variant="primary" type="button" size="lg" class="mt-4 ml-4" @click="SaveTemplate()">
-        {{ $t('editTemplate.publish') }}
-      </Button>
+      <Switch :defaultState="template.is_public" :label="$t('editTemplate.publicLabel')"
+        :onChange="(state) => onSwitchChange(state)" />
     </div>
   </main>
 </template>

@@ -1,6 +1,7 @@
 export default {
   searchForTemplate: 'Rechercher un modèle',
   searchPlaceholder: 'Rechercher...',
+  searching: 'Recherche en cours',
   createYourTemplate: 'Créer votre modèle',
   popularTemplates: 'Modèles populaires',
   whatsNew: 'Nouveautés',

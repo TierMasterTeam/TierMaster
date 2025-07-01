@@ -10,10 +10,11 @@ export default {
   noCover: 'No cover image selected',
   grades: 'Grades',
   save: 'Save Template',
-  publish: 'Publish Template',
   coverSuccess: 'Cover image updated successfully',
   coverError: 'Error uploading cover image',
   updateSuccess: 'Template updated successfully',
   updateError: 'Error updating template',
   removeImage: 'Remove image',
+  visibilityUpdated: 'Visibility updated: {visibility}',
+  publicLabel: 'Public',
 }

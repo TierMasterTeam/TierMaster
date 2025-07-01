@@ -48,7 +48,7 @@ const useLogin = async () => {
             <div class="flex md:h-[132px] gap-8 flex-col md:flex-row">
                 <img src="../../assets/logo.svg" width="167" height="132" alt="Logo" />
                 <div class="flex flex-col items-center justify-between h-full gap-2">
-                    <BaseInput type="text" :placeholder="$t('login.username')" class="block mt-1 h-12 w-80" v-model="username" />
+                    <BaseInput type="text" :placeholder="$t('login.email')" class="block mt-1 h-12 w-80" v-model="username" />
                     <BaseInput :type="showPassword ? 'text' : 'password'" :placeholder="$t('login.password')" class="block h-12 mb-1 w-80" v-model="password">
                         <template #right>
                             <button type="button" @click="showPassword = !showPassword" tabindex="-1" aria-label="Afficher ou masquer le mot de passe">

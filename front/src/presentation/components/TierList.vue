@@ -31,7 +31,6 @@ onMounted(() => {
     router.push({ name: 'home' })
     return
   }
-  console.log('Joining tierlist room with ID:', tierlistId)
   roomStore.join(tierlistId)
 })
 
