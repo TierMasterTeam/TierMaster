@@ -6,7 +6,7 @@ use std::sync::Arc;
 
 const TOKEN_EXPIRATION: u64 = 3600; // 1 hour
 const REFRESH_TOKEN_EXPIRATION: u64 = 604800; // 1 week
-const MAX_USER_SESSION_DURATION: u64 = 86400 * 30 * 3; // ~ 3 months
+const MAX_USER_SESSION_DURATION: u64 = REFRESH_TOKEN_EXPIRATION * 12; // ~ 3 months
 
 #[derive(new, Clone)]
 pub struct AuthRedisService { 
@@ -21,9 +21,7 @@ impl AuthRedisService {
         self.store_user_id_with_refresh_token(refresh_token, user_id).await?;
 
         self.store_refresh_token_with_token(token, refresh_token).await?;
-        self.store_refresh_token_with_user_id(user_id, refresh_token).await?;
-
-        self.store_start_session_timestamp(refresh_token).await
+        self.store_refresh_token_with_user_id(user_id, refresh_token).await
     }
 
     /// store info only for the access token
@@ -85,8 +83,8 @@ impl AuthRedisService {
         self.redis.store(refresh_token_key.as_str(), refresh_token.to_string(), Some(REFRESH_TOKEN_EXPIRATION)).await
     }
 
-    async fn store_start_session_timestamp(&self, refresh_token: &str) -> Result<(), ApiError> {
-        let user_session_key = self.make_key_to_store_refresh_token_with_token(refresh_token);
+    pub(crate) async fn store_start_session_timestamp(&self, refresh_token: &str) -> Result<(), ApiError> {
+        let user_session_key = self.make_key_to_store_start_session_timestamp(refresh_token);
         self.redis.store(user_session_key.as_str(), Utc::now().timestamp().to_string(), Some(MAX_USER_SESSION_DURATION)).await
     }
     

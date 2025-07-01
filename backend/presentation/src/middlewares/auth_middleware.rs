@@ -35,7 +35,8 @@ impl FromRequestParts<Arc<AppState>> for AuthSession {
                 .validate_session(signed_token)
                 .await
                 .map_err(|_| ApiError::Unauthorized("Invalid session".into()))?;
-
+            
+            
             Ok(AuthSession {
                 token,
                 user_id
