@@ -2,7 +2,7 @@ use derive_new::new;
 use domain::entities::{CreateTemplateEntity, TemplateEntity, UpdateTemplateEntity};
 use domain::error::ApiError;
 use domain::repositories::AbstractTemplateRepository;
-use domain::types::Pagination;
+use domain::types::{Pagination, SortOption};
 use std::collections::HashSet;
 use std::sync::Arc;
 
@@ -28,9 +28,9 @@ impl TemplateService {
         self.repo.update_template_by_id(id, template).await
     }
 
-    pub async fn search(&self, search_text: &str, pagination: Pagination) -> Result<Vec<TemplateEntity>, ApiError> {
+    pub async fn search(&self, search_text: &str, pagination: Pagination, sort_option: Option<SortOption>) -> Result<Vec<TemplateEntity>, ApiError> {
         let (title, tags) = extract_title_and_tags_from_search_text(search_text);
-        self.repo.search(title, tags, pagination).await
+        self.repo.search(title, tags, pagination, sort_option).await
     }
     
     pub async fn delete_by_id(&self, id: &str) -> Result<(), ApiError> {
