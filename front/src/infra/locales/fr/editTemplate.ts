@@ -10,10 +10,12 @@ export default {
   noCover: 'Aucune image de couverture sélectionnée',
   grades: 'Niveaux',
   save: 'Enregistrer',
-  publish: 'Publier',
+  publish: 'Publier en Public',
   coverSuccess: 'Image de couverture mise à jour',
   coverError: "Erreur lors de l'upload de l'image de couverture",
   updateSuccess: 'Tierlist mise à jour',
   updateError: 'Erreur lors de la mise à jour',
   removeImage: "Supprimer l'image",
+  visibilityUpdated: 'Visibilité mise à jour : {visibility}',
+  publicLabel: 'Public',
 }

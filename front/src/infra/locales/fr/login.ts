@@ -1,5 +1,5 @@
 export default {
-  username: "Nom d'utilisateur",
+  email: "Email",
   password: 'Mot de passe',
   login: 'Connexion',
   createAccount: 'Créer un compte !',
