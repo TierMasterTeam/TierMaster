@@ -31,8 +31,6 @@ onMounted(async () => {
 });
 
 const createTempateAction = async() => {
-    // Logic to create a new template
-    console.log('Creating new template....');
     const id = await tierListStore.initTemplate();
     if (id) {
         router.push({
