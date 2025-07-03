@@ -15,6 +15,8 @@ pub struct TemplateModel {
     pub name: String,
     pub is_public: bool,
     pub author: ObjectId,
+    #[serde(default)]
+    pub cover_image: String,
     pub tags: Vec<String>,
     pub cards: Vec<CardModel>,
     pub grades: Vec<TemplateGradeModel>,
@@ -31,6 +33,7 @@ impl TryEntityMapper<TemplateEntity> for TemplateModel {
             tags: self.tags,
             cards: self.cards.into_iter().map(EntityMapper::to_entity).collect(),
             grades: self.grades.into_iter().map(EntityMapper::to_entity).collect(),
+            cover_image: self.cover_image,
         }
     }
 }
@@ -50,6 +53,7 @@ impl TryFrom<TemplateEntity> for TemplateModel {
             tags: value.tags,
             cards: value.cards.into_iter().map(Into::into).collect(),
             grades: value.grades.into_iter().map(Into::into).collect(),
+            cover_image: value.cover_image,
         })
     }
 }
@@ -67,6 +71,7 @@ impl TryFrom<CreateTemplateEntity> for TemplateModel {
             tags: value.tags,
             cards: value.cards.into_iter().map(Into::into).collect(),
             grades: value.grades.into_iter().map(Into::into).collect(),
+            cover_image: value.cover_image,
         })
     }
 }

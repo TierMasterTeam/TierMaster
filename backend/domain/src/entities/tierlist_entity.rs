@@ -6,6 +6,7 @@ pub struct TierlistEntity {
     pub id: String,
     pub name: String,
     pub is_public: bool,
+    pub cover_image: String,
     pub author: String,
     pub tags: Vec<String>,
     pub cards: Vec<CardEntity>,
