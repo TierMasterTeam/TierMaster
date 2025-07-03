@@ -8,13 +8,15 @@ use axum_extra::TypedHeader;
 use domain::entities::{RoomEntity, TierlistRoomEntity};
 use domain::error::ApiError;
 use domain::mappers::EntityMapper;
+use domain::utils::CancellableTask;
 use log::{debug, error, info, warn};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use socketioxide::extract::{Data, SocketRef, State};
 use socketioxide::socket::Sid;
-use socketioxide::{BroadcastError, SendError, SocketIo};
+use socketioxide::{BroadcastError, SendError};
 use std::hash::{DefaultHasher, Hash, Hasher};
+use std::time::Duration;
 
 pub struct WebsocketController;
 
@@ -31,6 +33,12 @@ impl WebsocketController {
         
         let _ = socket.emit("ready", &room_user);
         debug!("Emitted ready event to client.");
+
+        let task = CancellableTask::new();
+        task.start(Duration::from_secs(10), async || {
+            info!("Task emitted");
+        });
+        task.cancel();
     }
 }
 
@@ -131,7 +139,7 @@ fn register_events(socket: SocketRef, room_user: RoomUserPresenter) {
 
             let update_result = app_state.services()
                 .websocket()
-                .update_tierlist(&room_id, tierlist.clone().to_entity())
+                .update_tierlist(&room_id, tierlist.clone().to_entity(), app_state.services().tierlist())
                 .await;
 
             broadcast_event("update-tierlist", socket, update_result, room_id).await;
@@ -182,6 +190,7 @@ async fn init_room(room_id: &str, room_user: RoomUserPresenter, app_state: AppSt
     let tierlist_room = RoomEntity {
         users: vec![room_user.to_entity()],
         tierlist: TierlistRoomEntity::from_tierlist_entity(tierlist),
+        save_task: None,
     };
     
     app_state.services().websocket().create(room_id, tierlist_room.clone()).await

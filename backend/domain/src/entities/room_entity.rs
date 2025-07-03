@@ -1,9 +1,10 @@
-use crate::entities::{CardEntity, GradeEntity, TierlistEntity};
+use crate::{entities::{CardEntity, GradeEntity, TierlistEntity}, utils::CancellableTask};
 
 #[derive(Clone)]
 pub struct RoomEntity {
     pub users: Vec<RoomUserEntity>,
     pub tierlist: TierlistRoomEntity,
+    pub save_task: Option<CancellableTask>
 }
 
 #[derive(Clone)]

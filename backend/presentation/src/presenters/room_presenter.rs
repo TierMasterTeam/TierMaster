@@ -78,6 +78,7 @@ impl EntityMapper<RoomEntity> for RoomPresenter {
         RoomEntity {
             users: self.users.into_iter().map(EntityMapper::to_entity).collect(),
             tierlist: self.tierlist.to_entity(),
+            save_task: None
         }
     }
 }
