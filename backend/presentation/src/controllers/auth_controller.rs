@@ -81,7 +81,7 @@ async fn me(
 fn make_auth_response(token: String, user: UserPresenter) -> Result<impl IntoResponse, ApiErrorResponse> {
     // TODO adding our website domain when dotenv is setup ( Domain=.tiermaster.app )
     // TODO adding Secure; when environment is prod to only support https
-    let cookie_value = format!("token={token}; HttpOnly; Path=/; Max-Age=3600"); // 1 hour
+    let cookie_value = format!("token={token}; HttpOnly; Path=/; Max-Age=3600000"); // 40 jours
     let parsed_cookie = cookie_value.parse()
         .map_err(|e| ApiError::InternalError(format!("Failed to parse cookie string : {e}")))?;
 
