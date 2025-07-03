@@ -12,9 +12,7 @@ use axum_extra::json;
 use domain::error::ApiError;
 use domain::mappers::EntityMapper;
 use domain::types::{Pagination, SortOption};
-use log::info;
 use std::sync::Arc;
-use std::thread::panicking;
 
 pub struct TemplateController;
 

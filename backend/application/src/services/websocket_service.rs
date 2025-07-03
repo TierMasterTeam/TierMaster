@@ -1,8 +1,14 @@
-use domain::entities::{RoomEntity, RoomUserEntity, TierlistRoomEntity};
+use domain::entities::{RoomEntity, RoomUserEntity, TierlistRoomEntity, UpdateTierlistEntity};
 use domain::error::ApiError;
+use domain::utils::CancellableTask;
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::time::Duration;
 use tokio::sync::RwLock;
+
+use crate::services::TierlistService;
+
+const AUTO_SAVE_TIMER: u64 = 10;
 
 pub type RoomStore = HashMap<String, RoomEntity>;
 
@@ -71,9 +77,26 @@ impl WebsocketService {
         }
     }
 
-    pub async fn update_tierlist(&self, room_id: &str, tierlist: TierlistRoomEntity) -> Result<RoomEntity, ApiError> {
+    pub async fn update_tierlist(&self, room_id: &str, tierlist: TierlistRoomEntity, service: &TierlistService) -> Result<RoomEntity, ApiError> {
         let mut tierlist_room = self.get(room_id).await?;
-        tierlist_room.tierlist = tierlist;
+        tierlist_room.tierlist = tierlist.clone();
+
+        //On annule la sauvegarde en cours;
+        if let Some(task) = tierlist_room.save_task.take() {
+            task.cancel();
+        }
+
+        //On programme une nouvelle sauvegarde;
+        let service = service.clone();
+        let id = tierlist.id.clone();
+        let tl: UpdateTierlistEntity = tierlist.into();
+        let task = CancellableTask::new();
+        task.start(Duration::from_secs(AUTO_SAVE_TIMER),move || {
+            async move {
+                let _ = service.update_tierlist_by_id(id.as_str(), tl).await;
+            }
+        });
+        tierlist_room.save_task = Some(task);
 
         self.update(room_id, tierlist_room).await
     }
