@@ -32,6 +32,12 @@ export const useTierListStore = defineStore('tierList', () => {
     return data
   }
 
+  const getUserTierLists = async (userId: string) => {
+    const response = await api.get(`tierlist/user/${userId}`)
+    const data = (await response.json()) as TierList[]
+    return data
+  }
+
   const saveTierList = async () => {
     if (!currentTierlist.value || !currentTierlist.value.id) return
     try {
@@ -92,7 +98,7 @@ export const useTierListStore = defineStore('tierList', () => {
       const tierList: TierList = {
         name: template.name,
         author: authorId,
-        imgCover: template.imgCover,
+        coverImage: template.coverImage,
         is_public: false,
         tags: template.tags,
         cards: template.cards,
@@ -167,6 +173,16 @@ export const useTierListStore = defineStore('tierList', () => {
     }
   }
 
+  const deleteTierList = async (tierListId: string) => {
+    try {
+      await api.delete(`tierlist/${tierListId}`)
+      showToast('Tier list deleted successfully', 'success', 2000)
+    } catch (error) {
+      console.error('Error deleting tier list:', error)
+      showToast('Failed to delete tier list', 'error', 2000)
+    }
+  }
+
   const searchTemplates = async (query: string, page: number = 1, perPage: number = 20) => {
     try {
       const response = await api.get(`template/search?query=${encodeURIComponent(query)}&page=${page}&per-page=${perPage}`)
@@ -183,6 +199,7 @@ export const useTierListStore = defineStore('tierList', () => {
     getTierListById,
     saveTierList,
     getUserTemplates,
+    getUserTierLists,
     currentTierlist,
     initTemplate,
     updateTemplate,
@@ -192,5 +209,6 @@ export const useTierListStore = defineStore('tierList', () => {
     createTierList,
     getTemplateById,
     deleteTemplate,
+    deleteTierList,
   }
 })

@@ -34,6 +34,10 @@ onMounted(async () => {
   if (id) {
     try {
       template.value = await tierListStore.getTemplateById(id as string);
+      // Initialiser l'URL de l'image de couverture si elle existe
+      if (template.value?.coverImage) {
+        coverImgUrl.value = template.value.coverImage;
+      }
     } catch (error) {
       console.error('Error fetching tier list:', error);
     }
@@ -48,8 +52,10 @@ const onCoverFileChange = async (event: Event) => {
       const formData = new FormData();
       formData.append('coverImage', file);
       const res = await tierListStore.uploadImages(formData);
-      if (res) {
-        // template.value!.coverImage = res; // backend retourne une URL
+      if (res && res.length > 0) {
+        template.value!.coverImage = res[0]; // backend retourne un tableau d'URLs
+        coverImgUrl.value = res[0]; // Mettre à jour l'URL pour l'affichage
+        await SaveTemplate(); // Sauvegarder le template avec la nouvelle image
         showToast(t('editTemplate.coverSuccess'), 'success');
       }
     } catch (error) {

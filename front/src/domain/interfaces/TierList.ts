@@ -2,7 +2,7 @@ export interface TierList {
   id?: string;
   name: string;
   author: string;
-  imgCover?: string;
+  coverImage?: string;
   is_public: boolean;
   tags: string[];
   cards: Card[];
@@ -34,7 +34,7 @@ export interface Template {
   id?: string;
   name: string;
   author: string;
-  imgCover?: string;
+  coverImage?: string;
   is_public: boolean;
   tags: string[];
   cards: Card[];

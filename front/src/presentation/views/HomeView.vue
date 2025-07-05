@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import BaseInput from '../components/base/BaseInput.vue';
-import { LayoutPanelTop, Search } from 'lucide-vue-next';
+import SearchBar from '../components/base/SearchBar.vue';
+import { LayoutPanelTop } from 'lucide-vue-next';
 import Button from '../components/base/Button.vue';
 import { onMounted, ref, computed, watch } from 'vue';
 import { useTierListStore } from '../stores/tierListStore';
@@ -75,19 +75,11 @@ onMounted(async () => {
       </h1>
 
       <div class="flex flex-col md:flex-row w-full justify-between gap-4">
-        <BaseInput
+        <SearchBar
           v-model="searchQuery"
-          :label="$t('home.searchForTemplate')"
           :placeholder="$t('home.searchPlaceholder')"
-          class="max-w-[39rem] flex-grow"
-          id="searchInput"
-        >
-          <template #right>
-            <label for="base-input" class="cursor-pointer flex items-center">
-              <Search class="h-5 w-5 text-light-gray-custom" />
-            </label>
-          </template>
-        </BaseInput>
+          class="w-full max-w-[30rem] grid3:max-w-[39rem] grid4:max-w-[50rem]"
+        />
 
         <Button variant="primary" class="w-fit" @click="createTemplateAction">
           <template #icon>

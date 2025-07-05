@@ -63,7 +63,7 @@ const router = createRouter({
         {
           path: '',
           name: 'myTierlists',
-          component: () => import('../views/TierListView.vue'),
+          component: () => import('../views/MyTierListsView.vue'),
           meta: {
             title: 'Mes Tier Lists | TierMaster',
             description: 'Accédez et jouer a nouveau à vos tier lists déjà créées.'
@@ -83,6 +83,22 @@ const router = createRouter({
           meta: {
             title: 'Tier List | TierMaster',
             description: 'Collaborez, modifier la tierlist'
+          }
+        },
+      ],
+    },
+    {
+      path: '/profile',
+      component: NavBarLayout,
+      meta: { requiresAuth: true },
+      children: [
+        {
+          path: '',
+          name: 'profile',
+          component: () => import('../views/ProfileView.vue'),
+          meta: {
+            title: 'Mon Profil | TierMaster',
+            description: 'Gérez votre profil utilisateur et vos paramètres.'
           }
         },
       ],

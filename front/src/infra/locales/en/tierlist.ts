@@ -1,3 +1,17 @@
 export default {
   joining: "You are joining the room...",
+  myTierLists: "My Tier Lists",
+  subtitle: "View and manage your created tier lists",
+  createNew: "Create New Tier List",
+  createFirst: "Create Your First Tier List",
+  searchPlaceholder: "Search tier lists...",
+  loading: "Loading...",
+  noResults: "No tier lists found for your search",
+  noTierLists: "You haven't created any tier lists yet",
+  untitled: "Untitled",
+  items: "{count} items | {count} item | {count} items",
+  edit: "Edit",
+  delete: "Delete",
+  confirmDelete: "Confirm Deletion",
+  confirmDeleteMessage: "Are you sure you want to delete \"{name}\"?",
 }

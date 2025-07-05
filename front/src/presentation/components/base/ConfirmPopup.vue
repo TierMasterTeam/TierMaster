@@ -1,7 +1,7 @@
 <template>
   <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center" @click.self="cancel">
     <div class="absolute inset-0 bg-dark-gray-custom/10 backdrop-blur-sm" @click="cancel"></div>
-    <div class="relative bg-dark-gray-custom rounded-lg shadow-lg p-8 min-w-[320px] z-10 flex flex-col items-center">
+    <div class="relative bg-dark-gray-custom border border-white-custom rounded-lg shadow-lg p-8 min-w-[320px] z-10 flex flex-col items-center">
       <button class="absolute top-2 right-2 text-gray-400 hover:text-gray-600" @click="cancel" aria-label="Fermer">
         <X :size="20" />
       </button>
