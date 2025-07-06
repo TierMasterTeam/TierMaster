@@ -27,17 +27,12 @@ const currentCategory = ref<string>('');
 const imageUploadRef = ref();
 const showNameBubbles = ref<boolean[]>([]);
 
-const coverImgUrl = ref<string>(''); // Placeholder image URL
 
 onMounted(async () => {
   const id = route.params.id;
   if (id) {
     try {
       template.value = await tierListStore.getTemplateById(id as string);
-      // Initialiser l'URL de l'image de couverture si elle existe
-      if (template.value?.coverImage) {
-        coverImgUrl.value = template.value.coverImage;
-      }
     } catch (error) {
       console.error('Error fetching tier list:', error);
     }
@@ -50,11 +45,12 @@ const onCoverFileChange = async (event: Event) => {
     const file = target.files[0];
     try {
       const formData = new FormData();
-      formData.append('coverImage', file);
+      formData.append('images', file); // Utiliser 'images' comme pour les autres uploads
+      console.log('Uploading cover image:', formData);
       const res = await tierListStore.uploadImages(formData);
+      console.log('Cover image upload response:', res);
       if (res && res.length > 0) {
         template.value!.coverImage = res[0]; // backend retourne un tableau d'URLs
-        coverImgUrl.value = res[0]; // Mettre à jour l'URL pour l'affichage
         await SaveTemplate(); // Sauvegarder le template avec la nouvelle image
         showToast(t('editTemplate.coverSuccess'), 'success');
       }
@@ -209,7 +205,7 @@ const onSwitchChange = async(state: boolean) => {
         <div class="absolute top-0 left-0 w-full md:relative">
           <label for="coverImageInput" class="w-full md:w-100 h-50 block mb-12">
             <h3 class="hidden md:block text-2xl font-jersey">{{ $t('editTemplate.cover') }}</h3>
-            <img v-if="coverImgUrl" :src="coverImgUrl" :alt="$t('editTemplate.coverAlt')"
+            <img v-if="template.coverImage" :src="template.coverImage" :alt="$t('editTemplate.coverAlt')"
               class="w-full h-full object-cover md:rounded-md md:border-white-custom md:border-2" />
             <div v-else
               class="w-full h-full flex items-center justify-center bg-light-gray-custom md:rounded-md mb-4 md:border-white-custom md:border-2 text-gray-500">
