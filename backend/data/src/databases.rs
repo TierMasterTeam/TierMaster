@@ -128,7 +128,7 @@ impl AwsBucket {
             .build();
 
         let config = aws_config::defaults(BehaviorVersion::v2025_01_17())
-            .region("auto")
+            .region("us-east-1")
             .credentials_provider(credentials)
             .endpoint_url(endpoint)
             .load()
