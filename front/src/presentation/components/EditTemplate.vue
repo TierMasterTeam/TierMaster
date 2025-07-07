@@ -27,7 +27,6 @@ const currentCategory = ref<string>('');
 const imageUploadRef = ref();
 const showNameBubbles = ref<boolean[]>([]);
 
-const coverImgUrl = ref<string>(''); // Placeholder image URL
 
 onMounted(async () => {
   const id = route.params.id;
@@ -46,10 +45,11 @@ const onCoverFileChange = async (event: Event) => {
     const file = target.files[0];
     try {
       const formData = new FormData();
-      formData.append('coverImage', file);
+      formData.append('images', file); // Utiliser 'images' comme pour les autres uploads
       const res = await tierListStore.uploadImages(formData);
-      if (res) {
-        // template.value!.coverImage = res; // backend retourne une URL
+      if (res && res.length > 0) {
+        template.value!.coverImage = res[0]; // backend retourne un tableau d'URLs
+        await SaveTemplate(); // Sauvegarder le template avec la nouvelle image
         showToast(t('editTemplate.coverSuccess'), 'success');
       }
     } catch (error) {
@@ -203,7 +203,7 @@ const onSwitchChange = async(state: boolean) => {
         <div class="absolute top-0 left-0 w-full md:relative">
           <label for="coverImageInput" class="w-full md:w-100 h-50 block mb-12">
             <h3 class="hidden md:block text-2xl font-jersey">{{ $t('editTemplate.cover') }}</h3>
-            <img v-if="coverImgUrl" :src="coverImgUrl" :alt="$t('editTemplate.coverAlt')"
+            <img v-if="template.coverImage" :src="template.coverImage" :alt="$t('editTemplate.coverAlt')"
               class="w-full h-full object-cover md:rounded-md md:border-white-custom md:border-2" />
             <div v-else
               class="w-full h-full flex items-center justify-center bg-light-gray-custom md:rounded-md mb-4 md:border-white-custom md:border-2 text-gray-500">

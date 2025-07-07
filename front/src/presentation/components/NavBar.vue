@@ -55,9 +55,9 @@ const useLogout = () => {
         {{ locale === 'fr' ? 'fr' : 'en' }}
       </button>
       <template v-if="isLoggedIn">
-        <button @click="useLogout">
-          <img src="../../assets/pp.png" alt="profile picture" class="rounded-full w-10 h-10 object-cover">
-        </button>
+        <router-link to="/profile">
+          <img :src="'https://api.dicebear.com/9.x/bottts/svg?seed='+user?.username" alt="profile picture" class="rounded-full w-10 h-10 object-cover hover:ring-2 bg-gray-custom hover:ring-light-green-custom transition-all duration-300">
+        </router-link>
       </template>
       <template v-else>
         <router-link to="/register" class="auth-link">{{ $t('nav.register') }}</router-link>

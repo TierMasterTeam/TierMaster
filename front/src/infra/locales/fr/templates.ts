@@ -4,4 +4,5 @@ export default {
   untitled: 'Modèle sans titre {n}',
   edit: 'Éditer',
   delete: 'Supprimer',
+  searchPlaceholder: 'Rechercher des modèles...'
 }

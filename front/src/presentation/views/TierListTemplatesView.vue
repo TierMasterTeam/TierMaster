@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import ConfirmPopup from '../components/base/ConfirmPopup.vue';
+import SearchBar from '../components/base/SearchBar.vue';
 import Button from '../components/base/Button.vue';
 import router from '../router';
 import { useTierListStore } from '../stores/tierListStore';
@@ -13,6 +14,8 @@ const user = authStore.user;
 const tierListStore = useTierListStore();
 
 const templates = ref<Template[]>([]);
+const filteredTemplates = ref<Template[]>([]);
+const searchQuery = ref('');
 
 const showDeletePopup = ref(false);
 const templateToDelete = ref<Template | null>(null);
@@ -25,6 +28,7 @@ onMounted(async () => {
     }
     try {
         templates.value = await tierListStore.getUserTemplates(user.id);
+        filteredTemplates.value = templates.value;
     } catch (error) {
         console.error('Error loading templates:', error);
     }
@@ -48,12 +52,26 @@ function getUntitledIndex(template: Template, index: number): number {
     if (template.name) return 0;
     // Count how many untitled templates exist before this one
     let count = 0;
-    for (let i = 0; i < templates.value.length; i++) {
-        if (!templates.value[i].name && i <= index) {
+    for (let i = 0; i < filteredTemplates.value.length; i++) {
+        if (!filteredTemplates.value[i].name && i <= index) {
             count++;
         }
     }
     return count;
+}
+
+// Filtrage par recherche
+const filterTemplates = () => {
+  if (!searchQuery.value.trim()) {
+    filteredTemplates.value = templates.value
+    return
+  }
+
+  const query = searchQuery.value.toLowerCase()
+  filteredTemplates.value = templates.value.filter(template =>
+    template.name?.toLowerCase().includes(query) ||
+    template.tags?.some(tag => tag.toLowerCase().includes(query))
+  )
 }
 
 function openDeletePopup(template: Template) {
@@ -71,6 +89,7 @@ async function confirmDelete() {
     try {
       await tierListStore.deleteTemplate(templateToDelete.value.id!)
       templates.value = templates.value.filter(t => t.id !== templateToDelete.value?.id)
+      filterTemplates()
     } catch (error) {
       console.error('Error deleting template:', error)
     }
@@ -85,11 +104,18 @@ async function confirmDelete() {
         <h1 class="text-[40px] font-jersey">
             {{ $t('templates.title') }}
         </h1>
-        <Button size="md" variant="primary" class="mt-4 w-fit" @click="createTempateAction">
+        <Button size="md" variant="primary" class="mt-4 w-fit mb-8" @click="createTempateAction">
             {{ $t('templates.createNew') }}
         </Button>
-        <ul class="flex w-full flex-col mt-4 border-2 border-white-custom">
-            <li v-for="(template, index) in templates" :key="template.id || index" class="flex items-center w-full justify-between p-2 border-b-2 border-white-custom">
+
+        <SearchBar
+            v-model="searchQuery"
+            :placeholder="$t('templates.searchPlaceholder')"
+            @update:model-value="filterTemplates"
+        />
+
+        <ul class="flex w-full flex-col border-2 border-white-custom mt-8">
+            <li v-for="(template, index) in filteredTemplates" :key="template.id || index" class="flex items-center w-full justify-between p-2 border-b-2 border-white-custom">
                 <div>
                     {{ template.name || $t('templates.untitled', { n: getUntitledIndex(template, index) }) }}
                 </div>

@@ -1,3 +1,17 @@
 export default {
   joining: "Connexion au salon en cours...",
+  myTierLists: "Mes Tier Lists",
+  subtitle: "Consultez et gérez vos tier lists créées",
+  createNew: "Créer une Nouvelle Tier List",
+  createFirst: "Créer Votre Première Tier List",
+  searchPlaceholder: "Rechercher des tier lists...",
+  loading: "Chargement...",
+  noResults: "Aucune tier list trouvée pour votre recherche",
+  noTierLists: "Vous n'avez pas encore créé de tier lists",
+  untitled: "Sans titre",
+  items: "{count} éléments | {count} élément | {count} éléments",
+  edit: "Modifier",
+  delete: "Supprimer",
+  confirmDelete: "Confirmer la suppression",
+  confirmDeleteMessage: "Êtes-vous sûr de vouloir supprimer \"{name}\" ?",
 }

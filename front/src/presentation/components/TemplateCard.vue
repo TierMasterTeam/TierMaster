@@ -18,8 +18,8 @@ const router = useRouter();
 const author = authStore.user?.id
 
 const getTemplateImage = (template: Template) => {
-  if (template.imgCover) {
-    return template.imgCover;
+  if (template.coverImage) {
+    return template.coverImage;
   }
   return template.cards && template.cards.length > 0 && template.cards[0].image
     ? template.cards[0].image
