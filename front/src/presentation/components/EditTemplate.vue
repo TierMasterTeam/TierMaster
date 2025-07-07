@@ -46,9 +46,7 @@ const onCoverFileChange = async (event: Event) => {
     try {
       const formData = new FormData();
       formData.append('images', file); // Utiliser 'images' comme pour les autres uploads
-      console.log('Uploading cover image:', formData);
       const res = await tierListStore.uploadImages(formData);
-      console.log('Cover image upload response:', res);
       if (res && res.length > 0) {
         template.value!.coverImage = res[0]; // backend retourne un tableau d'URLs
         await SaveTemplate(); // Sauvegarder le template avec la nouvelle image

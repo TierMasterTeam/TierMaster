@@ -33,7 +33,6 @@ const toggleEdit = () => {
 const saveProfile = async () => {
   try {
     // TODO: Implement API call to update user profile
-    console.log('Saving profile:', editForm.value)
     // await authStore.updateProfile(editForm.value)
     isEditing.value = false
   } catch (error) {
