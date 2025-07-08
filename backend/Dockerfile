@@ -27,6 +27,14 @@ RUN find core domain application data presentation -type f -name "*.rs" -exec to
 
 FROM debian:12.10-slim AS runner
 
+RUN apt-get update && apt-get install -y \
+    curl \
+    iputils-ping \
+    ca-certificates \
+    dnsutils \
+    bash
+
+
 COPY --from=builder /app/target/release/tiermaster-backend /usr/local/bin/tiermaster-backend
 
 EXPOSE 3000
