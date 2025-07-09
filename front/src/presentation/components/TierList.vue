@@ -11,6 +11,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useUtilsStore } from '../stores/utilsStore'
 import { useAuthStore } from '../stores/authStore'
 import { Share2 } from 'lucide-vue-next'
+import { useI18n } from 'vue-i18n'
 
 const showToast = useUtilsStore().showToast
 
@@ -25,10 +26,12 @@ const isDragging = ref(false)
 const route = useRoute()
 const tierlistId = route.params.id as string || ''
 
+const { t } = useI18n();
+
 onMounted(() => {
   if (!tierlistId) {
     console.error('Tierlist ID is required to join the room')
-    showToast('Tierlist ID is required to join the room', 'error', 2000)
+    showToast(t('tierlist.tierlistIdRequired'), 'error', 2000)
     router.push({ name: 'home' })
     return
   }
@@ -90,10 +93,10 @@ const shareUrl = async () => {
   try {
     const currentUrl = window.location.href
     await navigator.clipboard.writeText(currentUrl)
-    showToast('URL copiée dans le presse-papiers !', 'success', 2000)
+    showToast(t('tierlist.urlCopied'), 'success', 2000)
   } catch (error) {
     console.error('Erreur lors de la copie de l\'URL:', error)
-    showToast('Erreur lors de la copie de l\'URL', 'error', 2000)
+    showToast(t('tierlist.urlCopyError'), 'error', 2000)
   }
 }
 </script>
@@ -108,7 +111,7 @@ const shareUrl = async () => {
         class="flex items-center gap-2"
       >
         <Share2 class="w-4 h-4" />
-        Partager
+         {{ $t('tierlist.share') }}
       </Button>
 
       <div class="flex gap-2">
