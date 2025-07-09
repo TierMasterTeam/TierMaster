@@ -136,7 +136,7 @@ const onSwitchChange = async(state: boolean) => {
 
 
 <template>
-  <main class="p-16" v-if="template">
+  <main class="p-16 w-screen" v-if="template">
     <div class="flex w-full justify-between flex-col md:flex-row pt-40 md:pt-0">
       <div class="w-full">
         <label for="templateName">

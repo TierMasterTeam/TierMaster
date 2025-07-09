@@ -10,6 +10,7 @@ import type { RoomCard } from '@interfaces/RoomTierlist.ts'
 import { useRoute, useRouter } from 'vue-router'
 import { useUtilsStore } from '../stores/utilsStore'
 import { useAuthStore } from '../stores/authStore'
+import { Share2 } from 'lucide-vue-next'
 
 const showToast = useUtilsStore().showToast
 
@@ -84,13 +85,36 @@ const onDragEnd = (event: SortableEvent) => {
   updateCardDragState(card, false)
   roomStore.updateTierlist(roomStore.tierlist!)
 }
+
+const shareUrl = async () => {
+  try {
+    const currentUrl = window.location.href
+    await navigator.clipboard.writeText(currentUrl)
+    showToast('URL copiée dans le presse-papiers !', 'success', 2000)
+  } catch (error) {
+    console.error('Erreur lors de la copie de l\'URL:', error)
+    showToast('Erreur lors de la copie de l\'URL', 'error', 2000)
+  }
+}
 </script>
 
 <template>
   <div class="container mx-auto p-4 pb-8" v-if="roomStore.tierlist">
-    <div class="flex justify-end gap-2 p-2">
-      <div v-for="user in roomStore.users" :key="user.id">
-        <RoomUserAvatar :user="user" size="large" />
+    <div class="flex justify-between items-center gap-2 p-2">
+      <Button
+        variant="secondary"
+        size="md"
+        @click="shareUrl"
+        class="flex items-center gap-2"
+      >
+        <Share2 class="w-4 h-4" />
+        Partager
+      </Button>
+
+      <div class="flex gap-2">
+        <div v-for="user in roomStore.users" :key="user.id">
+          <RoomUserAvatar :user="user" size="large" />
+        </div>
       </div>
     </div>
 
