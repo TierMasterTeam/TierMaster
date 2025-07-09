@@ -14,4 +14,8 @@ export default {
   delete: "Delete",
   confirmDelete: "Confirm Deletion",
   confirmDeleteMessage: "Are you sure you want to delete \"{name}\"?",
+  share: "Share",
+  urlCopied: "URL copied to clipboard!",
+  urlCopyError: "Error copying URL",
+  tierlistIdRequired: "Tierlist ID is required to join the room",
 }

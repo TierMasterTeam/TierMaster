@@ -10,6 +10,8 @@ import type { RoomCard } from '@interfaces/RoomTierlist.ts'
 import { useRoute, useRouter } from 'vue-router'
 import { useUtilsStore } from '../stores/utilsStore'
 import { useAuthStore } from '../stores/authStore'
+import { Share2 } from 'lucide-vue-next'
+import { useI18n } from 'vue-i18n'
 
 const showToast = useUtilsStore().showToast
 
@@ -24,10 +26,12 @@ const isDragging = ref(false)
 const route = useRoute()
 const tierlistId = route.params.id as string || ''
 
+const { t } = useI18n();
+
 onMounted(() => {
   if (!tierlistId) {
     console.error('Tierlist ID is required to join the room')
-    showToast('Tierlist ID is required to join the room', 'error', 2000)
+    showToast(t('tierlist.tierlistIdRequired'), 'error', 2000)
     router.push({ name: 'home' })
     return
   }
@@ -84,13 +88,36 @@ const onDragEnd = (event: SortableEvent) => {
   updateCardDragState(card, false)
   roomStore.updateTierlist(roomStore.tierlist!)
 }
+
+const shareUrl = async () => {
+  try {
+    const currentUrl = window.location.href
+    await navigator.clipboard.writeText(currentUrl)
+    showToast(t('tierlist.urlCopied'), 'success', 2000)
+  } catch (error) {
+    console.error('Erreur lors de la copie de l\'URL:', error)
+    showToast(t('tierlist.urlCopyError'), 'error', 2000)
+  }
+}
 </script>
 
 <template>
   <div class="container mx-auto p-4 pb-8" v-if="roomStore.tierlist">
-    <div class="flex justify-end gap-2 p-2">
-      <div v-for="user in roomStore.users" :key="user.id">
-        <RoomUserAvatar :user="user" size="large" />
+    <div class="flex justify-between items-center gap-2 p-2">
+      <Button
+        variant="secondary"
+        size="md"
+        @click="shareUrl"
+        class="flex items-center gap-2"
+      >
+        <Share2 class="w-4 h-4" />
+         {{ $t('tierlist.share') }}
+      </Button>
+
+      <div class="flex gap-2">
+        <div v-for="user in roomStore.users" :key="user.id">
+          <RoomUserAvatar :user="user" size="large" />
+        </div>
       </div>
     </div>
 

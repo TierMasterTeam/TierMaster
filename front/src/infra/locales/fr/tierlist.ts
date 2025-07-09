@@ -14,4 +14,8 @@ export default {
   delete: "Supprimer",
   confirmDelete: "Confirmer la suppression",
   confirmDeleteMessage: "Êtes-vous sûr de vouloir supprimer \"{name}\" ?",
+  share: "Partager",
+  urlCopied: "URL copiée dans le presse-papiers !",
+  urlCopyError: "Erreur lors de la copie de l'URL",
+  tierlistIdRequired: "L'ID de la tier list est requis pour rejoindre la salle",
 }
