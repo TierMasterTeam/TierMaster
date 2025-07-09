@@ -89,6 +89,7 @@ impl AbstractTemplateRepository for TemplateRepository {
         template_entity.name = template.name;
         template_entity.is_public = template.is_public;
         template_entity.tags = template.tags;
+        template_entity.cover_image = template.cover_image;
         template_entity.cards = template.cards.into_iter().map(CardModel::from).collect();
         template_entity.grades = template.grades.into_iter().map(TemplateGradeModel::from).collect();
         

@@ -11,7 +11,7 @@ pub struct CreateTemplatePresenter {
     pub name: String,
     pub author: String,
     pub is_public: bool,
-    #[serde(rename = "coverImage")]
+    #[serde(default, rename = "coverImage")]
     pub cover_image: String,
     pub tags: Vec<String>,
     pub cards: Vec<CardPresenter>,

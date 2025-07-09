@@ -11,7 +11,7 @@ pub struct CreateTierlistPresenter {
     pub name: String,
     pub is_public: bool,
     pub author: String,
-    #[serde(rename = "coverImage")]
+    #[serde(default, rename = "coverImage")]
     pub cover_image: String,
     pub tags: Vec<String>,
     pub cards: Vec<CardPresenter>,
