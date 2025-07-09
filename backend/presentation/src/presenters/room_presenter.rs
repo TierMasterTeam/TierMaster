@@ -22,6 +22,8 @@ pub struct TierlistRoomPresenter {
     #[serde(rename(serialize = "isPublic", deserialize = "isPublic"))]
     pub is_public: bool,
     pub author: String,
+    #[serde(default, rename = "coverImage")]
+    pub cover_image: String,
     pub tags: Vec<String>,
     pub cards: Vec<CardRoomPresenter>,
     pub grades: Vec<GradeRoomPresenter>,
@@ -93,6 +95,7 @@ impl From<TierlistRoomEntity> for TierlistRoomPresenter {
             tags: value.tags,
             cards: value.cards.into_iter().map(Into::into).collect(),
             grades: value.grades.into_iter().map(Into::into).collect(),
+            cover_image: value.cover_image,
         }
     }
 }
@@ -107,6 +110,7 @@ impl EntityMapper<TierlistRoomEntity> for TierlistRoomPresenter {
             tags: self.tags,
             cards: self.cards.into_iter().map(EntityMapper::to_entity).collect(),
             grades: self.grades.into_iter().map(EntityMapper::to_entity).collect(),
+            cover_image: self.cover_image,
         }
     }
 }

@@ -19,6 +19,7 @@ pub struct TierlistRoomEntity {
     pub id: String,
     pub name: String,
     pub is_public: bool,
+    pub cover_image: String,
     pub author: String,
     pub tags: Vec<String>,
     pub cards: Vec<CardRoomEntity>,
@@ -50,6 +51,7 @@ impl TierlistRoomEntity {
             tags: tierlist_entity.tags,
             cards: tierlist_entity.cards.into_iter().map(CardRoomEntity::from_card_entity).collect(),
             grades: tierlist_entity.grades.into_iter().map(GradeRoomEntity::from_grade_entity).collect(),
+            cover_image: tierlist_entity.cover_image,
         }
     }
 }

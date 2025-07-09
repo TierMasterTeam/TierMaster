@@ -74,6 +74,7 @@ fn create_cors() -> CorsLayer {
     let origins = [
         "http://localhost:5173".parse().unwrap(),
         "https://tiermaster.app".parse().unwrap(),
+        "https://www.tiermaster.app".parse().unwrap(),
     ];
 
     CorsLayer::new()

@@ -94,6 +94,7 @@ impl AbstractTierlistRepository for TierlistRepository {
         tierlist_entity.name = tierlist.name;
         tierlist_entity.is_public = tierlist.is_public;
         tierlist_entity.tags = tierlist.tags;
+        tierlist_entity.cover_image = tierlist.cover_image;
         tierlist_entity.cards = tierlist.cards.into_iter().map(CardModel::from).collect();
         tierlist_entity.grades = tierlist.grades.into_iter().map(GradeModel::from).collect();
         
