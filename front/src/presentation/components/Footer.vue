@@ -13,7 +13,7 @@
   </div>
   <div class="flex flex-col items-end gap-6 justify-end">
     <p>
-      {{ $t('footer.contact') }}
+      {{ $t('footer.contact') }}team.tiermaster@gmail.com
     </p>
     <p>
       {{ $t('footer.copyright') }}
