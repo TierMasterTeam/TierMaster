@@ -17,6 +17,7 @@ const tierListStore = useTierListStore();
 const templates = ref<Template[]>([]);
 const searchQuery = ref('');
 const CarouselTemplates = ref<Template[]>([]);
+const randomCarouselTemplates = ref<Template[]>([]);
 
 const resultNb = computed(() => templates.value.length);
 
@@ -60,7 +61,12 @@ const createTemplateAction = async () => {
 
 onMounted(async () => {
   try {
-    CarouselTemplates.value = await tierListStore.getPublicTemplates();
+    const allTemplates = await tierListStore.getPublicTemplates();
+    CarouselTemplates.value = allTemplates;
+    // Mélange l'ordre des templates pour le premier carousel
+    if (Array.isArray(allTemplates) && allTemplates.length > 0) {
+      randomCarouselTemplates.value = [...allTemplates].sort(() => Math.random() - 0.5);
+    }
   } catch (error) {
     console.error('Erreur lors du chargement des templates populaires:', error);
   }
@@ -93,7 +99,7 @@ onMounted(async () => {
         <h2 class="font-jersey tracking-widest text-[2.5rem] pb-4">
           {{ $t('home.popularTemplates') }}
         </h2>
-        <TemplateCarousel :templates="CarouselTemplates" />
+  <TemplateCarousel :templates="randomCarouselTemplates" />
 
         <h2 class="font-jersey tracking-widest text-[2.5rem] pt-16">
           {{ $t('home.whatsNew') }}

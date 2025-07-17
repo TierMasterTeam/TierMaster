@@ -6,7 +6,7 @@ export default {
   popularTemplates: 'Modèles populaires',
   whatsNew: 'Nouveautés',
   whatsNewDesc:
-    'Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.',
+    "Découvrez les templates de tierlist créés par la communauté, jouez en temps réel avec vos amis et créez vos propres tierlists personnalisées. Partagez, comparez et amusez-vous ensemble sur TierMaster !",
   recentTemplates: 'Modèles récents',
   results: 'résultats',
   noTemplatesFound: 'Aucun modèle trouvé pour "{query}"',
